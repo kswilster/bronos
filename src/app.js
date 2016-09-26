@@ -3,14 +3,6 @@ var Sonos = require('sonos');
 var program = require('commander');
 var spawn = require('child_process').spawn;
 
-// process.stdin.on('readable', () => {
-//   var chunk = process.stdin.read();
-//   if (chunk !== null) {
-//     console.log(`data: ${chunk}`);
-//     process.stdout.write(`data: ${chunk}`);
-//   }
-// });
-
 const app = {
   run: async function(searchTerm) {
     const spotifyApi = new SpotifyWebApi();
@@ -19,24 +11,34 @@ const app = {
     var fzfInput = "";
     var log = "";
 
-    for (const track of items) {
-      fzfInput += `${track.artists[0].name}\t\t${track.name}\n`;
-    }
+    items.forEach(function(track, index) {
+      fzfInput += `${index}: ${track.artists[0].name}\t\t${track.name}\n`;
+    });
 
-    const child = spawn(`echo "${fzfInput}" | fzf`, {
+    const result = await this.startFzf(fzfInput);
+    const index = result.split(':')[0];
+    const track = items[index];
+    console.log(track.id);
+  },
+
+  startFzf: async function(entries) {
+    const fzf = spawn(`echo "${entries}" | fzf`, {
       stdio: ['inherit', 'pipe', 'inherit'],
       shell: true
     });
 
-    child.stdout.setEncoding('utf-8');
-    child.stdout.on('readable', () => {
-      const value = child.stdout.read();
-      console.log('readable: ' + value);
+    fzf.stdout.setEncoding('utf-8');
+
+    const promise = new Promise(function(resolve, reject) {
+      fzf.stdout.on('readable', () => {
+        const value = fzf.stdout.read();
+        if (value !== null) {
+          resolve(value);
+        }
+      });
     });
 
-    child.on('close', () => {
-      console.log('fzf closed');
-    });
+    return promise;
   }
 }
 
