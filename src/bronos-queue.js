@@ -39,6 +39,7 @@ const app = {
   searchByTrack: async function(query) {
     const tracks = await this.findTracks(query);
     const trackId = await this.chooseTrack(tracks);
+    console.log(trackId);
   },
 
   chooseArtist: async function(artists) {
