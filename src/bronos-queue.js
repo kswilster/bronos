@@ -7,12 +7,12 @@ var spawn = require('child_process').spawn;
 
 const app = {
   run: async function(searchTerm) {
+    const spotifyApi = new SpotifyWebApi();
     const { body: { tracks: { items } } } = await spotifyApi.search(searchTerm, ['track'], {
       limit: 50
     });
 
     var fzfInput = "";
-    var log = "";
 
     items.forEach(function(track, index) {
       fzfInput += `${index}: ${track.artists[0].name}\t\t${track.name}\n`;
@@ -49,10 +49,10 @@ const app = {
 // TODO: handle searching for artists
 
 program
-  .arguments('<query>')
+  .arguments('<query...>')
   .option('-i, --index [<index>]', 'queue insertion index')
   .option('-t, --type [<types>]', 'types of entities')
   .action(function(query, options) {
-    app.run(query);
+    app.run(query.join(' '));
   })
   .parse(process.argv);
