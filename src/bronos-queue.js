@@ -62,7 +62,7 @@ const app = {
     return artist.id;
   },
 
-  chooseAlbum: async function(albums, { includeTopTracks=false }) {
+  chooseAlbum: async function(albums, {includeTopTracks=false}={}) {
     var fzfInput = '';
 
     if (includeTopTracks) {
