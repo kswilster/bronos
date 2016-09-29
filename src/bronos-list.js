@@ -2,7 +2,6 @@ require('babel-polyfill');
 import _ from 'underscore';
 
 var sonos = require('sonos');
-// var program = require('commander');
 
 function handleError (err) {
   console.error('ERROR: ' + err.message)
