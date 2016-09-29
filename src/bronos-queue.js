@@ -1,3 +1,5 @@
+require('babel-polyfill');
+
 var SpotifyWebApi = require('spotify-web-api-node');
 var Sonos = require('sonos');
 var program = require('commander');
@@ -5,8 +7,9 @@ var spawn = require('child_process').spawn;
 
 const app = {
   run: async function(searchTerm) {
-    const spotifyApi = new SpotifyWebApi();
-    const { body: { tracks: { items } } } = await spotifyApi.searchTracks(searchTerm);
+    const { body: { tracks: { items } } } = await spotifyApi.search(searchTerm, ['track'], {
+      limit: 50
+    });
 
     var fzfInput = "";
     var log = "";
@@ -42,9 +45,14 @@ const app = {
   }
 }
 
+// TODO: handle insert at index
+// TODO: handle searching for artists
+
 program
-  .arguments('<searchTerm>')
-  .action(function(searchTerm) {
-    app.run(searchTerm);
+  .arguments('<query>')
+  .option('-i, --index [<index>]', 'queue insertion index')
+  .option('-t, --type [<types>]', 'types of entities')
+  .action(function(query, options) {
+    app.run(query);
   })
   .parse(process.argv);
