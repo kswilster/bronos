@@ -31,22 +31,22 @@ const app = {
       tracks = await this.getAlbumTracks(albumId);
     }
 
-    const trackId = await this.chooseTrack(tracks);
-    console.log(trackId);
+    const trackIds = await this.chooseTracks(tracks);
+    console.log(trackIds);
   },
 
   searchByAlbum: async function(query) {
     const albums = await this.findAlbums(query);
     const albumId = await this.chooseAlbum(albums);
     const tracks = await this.getAlbumTracks(albumId);
-    const trackId = await this.chooseTrack(tracks);
-    console.log(trackId);
+    const trackIds = await this.chooseTracks(tracks);
+    console.log(trackIds);
   },
 
   searchByTrack: async function(query) {
     const tracks = await this.findTracks(query);
-    const trackId = await this.chooseTrack(tracks);
-    console.log(trackId);
+    const trackIds = await this.chooseTracks(tracks);
+    console.log(trackIds);
   },
 
   chooseArtist: async function(artists) {
@@ -82,17 +82,24 @@ const app = {
     return album.id;
   },
 
-  chooseTrack: async function(tracks) {
+  chooseTracks: async function(tracks) {
     var fzfInput = "";
 
     tracks.forEach(function(track, index) {
       fzfInput += `${index}: ${track.artists[0].name}\t\t${track.name}\n`;
     });
 
-    const result = await this.startFzf(fzfInput);
-    const index = result.split(':')[0];
-    const track = tracks[index];
-    return track.id;
+    const result = await this.startFzf(fzfInput, true);
+    const lines = result.split('\n');
+    lines.shift();
+    const chosenTrackIds = [];
+
+    for (const line in lines) {
+      const index = line.split(':')[0];
+      const track = tracks[index];
+      chosenTrackIds.push(track.id);
+    }
+    return chosenTrackIds;
   },
 
   /**
@@ -134,8 +141,9 @@ const app = {
     return items;
   },
 
-  startFzf: async function(entries) {
-    const fzf = spawn(`echo "${entries}" | fzf`, {
+  startFzf: async function(entries, multiple=false) {
+    const fzfCommand = multiple ? 'fzf -m' : 'fzf';
+    const fzf = spawn(`echo "${entries}" | ${fzfCommand}`, {
       stdio: ['inherit', 'pipe', 'inherit'],
       shell: true
     });
