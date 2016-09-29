@@ -22,8 +22,15 @@ const app = {
     const artists = await this.findArtists(query);
     const artistId = await this.chooseArtist(artists);
     const albums = await this.getArtistAlbums(artistId);
-    const albumId = await this.chooseAlbum(albums);
-    const tracks = await this.getAlbumTracks(albumId);
+    const albumId = await this.chooseAlbum(albums, { includeTopTracks: true });
+
+    var tracks;
+    if (albumId === 'TOP_TRACKS') {
+      tracks = await this.getArtistTopTracks(artistId);
+    } else {
+      tracks = await this.getAlbumTracks(albumId);
+    }
+
     const trackId = await this.chooseTrack(tracks);
     console.log(trackId);
   },
@@ -55,8 +62,15 @@ const app = {
     return artist.id;
   },
 
-  chooseAlbum: async function(albums) {
+  chooseAlbum: async function(albums, { includeTopTracks=false }) {
     var fzfInput = '';
+
+    if (includeTopTracks) {
+      albums.unshift({
+        id: 'TOP_TRACKS',
+        name: 'Top Tracks'
+      });
+    }
 
     albums.forEach(function(album, index) {
       fzfInput += `${index}: ${album.name}\n`;
@@ -108,6 +122,11 @@ const app = {
   getArtistAlbums: async function(artistId) {
     const { body: { items } } = await spotifyApi.getArtistAlbums(artistId);
     return items;
+  },
+
+  getArtistTopTracks: async function(artistId) {
+    const { body: { tracks } } = await spotifyApi.getArtistTopTracks(artistId, 'US');
+    return tracks;
   },
 
   getAlbumTracks: async function(albumId) {
