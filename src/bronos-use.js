@@ -7,10 +7,11 @@ var os = require('os');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var sonos = require('sonos');
+var sonosServer;
 
 function handleError (err) {
-  console.error('ERROR: ' + err.message)
-  process.exit(1)
+  console.error('ERROR: ' + err);
+  process.exit(1);
 }
 
 function sleep(timeout) {
@@ -30,10 +31,17 @@ const app = {
     const zones = await this.getZones();
     const zone = await this.chooseZone(zones);
 
-    const config = await this.readConfig();
+    var config;
+    try {
+      config = await this.readConfig();
+    } catch (e) {
+      config = {};
+    }
+
     await this.writeConfig({ ...config, zone });
-    
-    process.exit();
+
+    sonosServer.kill('SIGKILL');
+    process.exit(1);
   },
 
   getZones: async function() {
@@ -85,7 +93,8 @@ const app = {
   },
 
   startSonosServer: async function() {
-    const sonosServer = spawn('node ~/dev/node-sonos-http-api/server.js', {
+    // TODO: spawn this from node_modules directory for portability
+    sonosServer = spawn('node ~/dev/node-sonos-http-api/server.js', {
       stdio: ['inherit', 'pipe', 'ignore'],
       shell: true
     });
@@ -104,9 +113,15 @@ const app = {
   },
 
   readConfig: async function() {
-    const promise = new Promise(function(resolve, reject) {
+    const promise = new Promise((resolve, reject) => {
       fs.readFile(`${os.homedir()}/.bronos`, (err, data) => {
-        resolve(JSON.parse(data));
+        if (err) reject(err);
+
+        if (data && data.length) {
+          resolve(JSON.parse(data));
+        } else {
+          reject();
+        }
       });
     });
 
@@ -116,7 +131,7 @@ const app = {
   writeConfig: async function(data) {
     const promise = new Promise(function(resolve, reject) {
       fs.writeFile(`${os.homedir()}/.bronos`, JSON.stringify(data), (err) => {
-        if (err) console.log(err);
+        if (err) handleError(err);
         resolve();
       });
     });
