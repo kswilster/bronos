@@ -3,6 +3,8 @@ import _ from 'underscore';
 import request from 'request';
 import najax from 'najax';
 
+var os = require('os');
+var fs = require('fs');
 var spawn = require('child_process').spawn;
 var sonos = require('sonos');
 
@@ -22,9 +24,16 @@ function sleep(timeout) {
 const app = {
   run: async function() {
     await this.startSonosServer();
+    // TODO: why is this necessary?
+    await sleep(1000);
+
     const zones = await this.getZones();
-    const zoneId = await this.chooseZone(zones);
-    console.log(zoneId);
+    const zone = await this.chooseZone(zones);
+
+    const config = await this.readConfig();
+    await this.writeConfig({ ...config, zone });
+    
+    process.exit();
   },
 
   getZones: async function() {
@@ -51,7 +60,7 @@ const app = {
     const result = await this.startFzf(fzfInput);
     const index = result.split(':')[0];
     const zone = zones[index];
-    return zone.uuid;
+    return zone;
   },
 
   startFzf: async function(entries, multiple=false) {
@@ -87,12 +96,32 @@ const app = {
       sonosServer.stdout.on('readable', () => {
         const value = sonosServer.stdout.read();
         if (value && value.includes('listening')) {
-          // TODO: why is this necessary?
-          await sleep(1000);
           resolve();
         }
       });
     });
+    return promise;
+  },
+
+  readConfig: async function() {
+    const promise = new Promise(function(resolve, reject) {
+      fs.readFile(`${os.homedir()}/.bronos`, (err, data) => {
+        resolve(JSON.parse(data));
+      });
+    });
+
+    return promise;
+  },
+
+  writeConfig: async function(data) {
+    const promise = new Promise(function(resolve, reject) {
+      fs.writeFile(`${os.homedir()}/.bronos`, JSON.stringify(data), (err) => {
+        if (err) console.log(err);
+        resolve();
+      });
+    });
+
+    return promise;
   }
 };
 
