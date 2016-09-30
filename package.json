@@ -9,7 +9,7 @@
     "bronos": "node ./dist/bronos.js"
   },
   "bin": {
-    "bronos": "./dist/index.js"
+    "bronos": "./dist/bronos.js"
   },
   "author": "Keith Williams",
   "license": "ISC",

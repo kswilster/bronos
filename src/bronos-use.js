@@ -9,6 +9,11 @@ var spawn = require('child_process').spawn;
 var sonos = require('sonos');
 var sonosServer;
 
+process.on('uncaughtException', (err) => {
+  sonosServer && sonosServer.kill('SIGKILL');
+  fs.writeSync(1, `Caught exception: ${err}`);
+});
+
 function handleError (err) {
   console.error('ERROR: ' + err);
   process.exit(1);
@@ -93,22 +98,47 @@ const app = {
   },
 
   startSonosServer: async function() {
-    // TODO: spawn this from node_modules directory for portability
-    sonosServer = spawn('node ~/dev/node-sonos-http-api/server.js', {
-      stdio: ['inherit', 'pipe', 'ignore'],
-      shell: true
-    });
-
-    sonosServer.stdout.setEncoding('utf-8');
-
     const promise = new Promise(function(resolve) {
+      // TODO: spawn this from node_modules directory for portability
+      sonosServer = spawn('node ~/dev/node-sonos-http-api/server.js', {
+        stdio: ['inherit', 'pipe', 'pipe'],
+        shell: true
+      });
+
+      var lastError;
+
+      // shutdown sonosServer if it is not available after 10 seconds
+      const timeout = setTimeout(() => {
+        sonosServer.kill('SIGKILL');
+        console.log('failed to start sonos server');
+      }, 3000);
+
+      sonosServer.on('exit', (code, signal) => {
+        console.log('sonos server shut down');
+        console.log(lastError);
+        clearTimeout(timeout);
+        return;
+      });
+
+      sonosServer.stdout.setEncoding('utf-8');
+      sonosServer.stderr.setEncoding('utf-8');
+
       sonosServer.stdout.on('readable', () => {
         const value = sonosServer.stdout.read();
         if (value && value.includes('listening')) {
+          clearTimeout(timeout);
           resolve();
         }
       });
+
+      sonosServer.stderr.on('readable', () => {
+        const err = sonosServer.stderr.read();
+        if (err && err.length) {
+          lastError = err;
+        }
+      });
     });
+
     return promise;
   },
 
