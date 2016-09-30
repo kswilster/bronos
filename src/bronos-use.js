@@ -1,5 +1,7 @@
 require('babel-polyfill');
 import _ from 'underscore';
+import request from 'request';
+import najax from 'najax';
 
 var spawn = require('child_process').spawn;
 var sonos = require('sonos');
@@ -9,40 +11,31 @@ function handleError (err) {
   process.exit(1)
 }
 
+function sleep(timeout) {
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
+  });
+}
+
 const app = {
   run: async function() {
-    const initDevice = await this.getInitialDevice();
-    const zones = await this.getZones(initDevice);
+    await this.startSonosServer();
+    const zones = await this.getZones();
     const zoneId = await this.chooseZone(zones);
     console.log(zoneId);
-
-    // TODO: figure out why this won't exit on its own
-    process.exit();
   },
 
-  getInitialDevice: async function() {
-    const search = sonos.search();
-    const timeout = setTimeout(function() {
-      search.socket.close();
-      console.log('Unable to find Sonos device');
-    }, 10000);
-
+  getZones: async function() {
     const promise = new Promise(function(resolve, reject) {
-      search.once('DeviceAvailable', function(device) {
-        clearTimeout(timeout);
-        search.socket.close();
-        resolve(device);
-      });
-    });
-    return promise;
-  },
-
-  getZones: async function(initDevice) {
-    const promise = new Promise(function(resolve, reject) {
-      initDevice.getTopology(function(err, top) {
-        if (err) throw err;
-
-        resolve(top.zones);
+      najax.get('http://localhost:5005/zones', function(response) {
+        const parsedResponse = JSON.parse(response);
+        const zones = [];
+        for (const entry of parsedResponse) {
+          zones.push(entry.members[0]);
+        }
+        resolve(zones);
       });
     });
 
@@ -52,13 +45,13 @@ const app = {
   chooseZone: async function(zones) {
     var fzfInput = '';
     zones.forEach(function(zone, index) {
-      fzfInput += `${index}: ${zone.name}\n`;
+      fzfInput += `${index}: ${zone.roomName}\n`;
     });
 
     const result = await this.startFzf(fzfInput);
     const index = result.split(':')[0];
     const zone = zones[index];
-    return zone;
+    return zone.uuid;
   },
 
   startFzf: async function(entries, multiple=false) {
@@ -80,6 +73,26 @@ const app = {
     });
 
     return promise;
+  },
+
+  startSonosServer: async function() {
+    const sonosServer = spawn('node ~/dev/node-sonos-http-api/server.js', {
+      stdio: ['inherit', 'pipe', 'ignore'],
+      shell: true
+    });
+
+    sonosServer.stdout.setEncoding('utf-8');
+
+    const promise = new Promise(function(resolve) {
+      sonosServer.stdout.on('readable', () => {
+        const value = sonosServer.stdout.read();
+        if (value && value.includes('listening')) {
+          // TODO: why is this necessary?
+          await sleep(1000);
+          resolve();
+        }
+      });
+    });
   }
 };
 
