@@ -163,13 +163,19 @@ const app = {
   }
 }
 
-// TODO: handle insert at index
+var queryValue;
 
 program
   .arguments('<query...>')
   .option('-i, --index [<index>]', 'queue insertion index')
   .option('-t, --type [<type>]', 'type of entity to search for (artist | album | track). Defaults to track')
   .action(function(query, options) {
+    queryValue = query;
     app.run(query.join(' '), options);
   })
   .parse(process.argv);
+
+  if (typeof queryValue === 'undefined') {
+     console.error('no query given!');
+     process.exit(1);
+  }

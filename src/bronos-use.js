@@ -16,6 +16,11 @@ process.on('uncaughtException', (err) => {
 
 function handleError (err) {
   console.error('ERROR: ' + err);
+  exit();
+}
+
+function exit() {
+  sonosServer && sonosServer.kill('SIGKILL');
   process.exit(1);
 }
 
@@ -33,7 +38,11 @@ const app = {
     // TODO: why is this necessary?
     await sleep(1000);
 
-    const zones = await this.getZones();
+    try {
+      const zones = await this.getZones();
+    } catch (e) {
+      handleError(e);
+    }
     const zone = await this.chooseZone(zones);
 
     var config;
@@ -51,12 +60,17 @@ const app = {
 
   getZones: async function() {
     const promise = new Promise(function(resolve, reject) {
+      const timeout = setTimeout(() => {
+        reject('No Sonos devices found');
+      }, 3000);
+
       najax.get('http://localhost:5005/zones', function(response) {
         const parsedResponse = JSON.parse(response);
         const zones = [];
         for (const entry of parsedResponse) {
           zones.push(entry.members[0]);
         }
+        clearTimeout(timeout);
         resolve(zones);
       });
     });
