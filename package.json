@@ -23,6 +23,7 @@
     "babel-preset-stage-1": "^6.13.0",
     "babel-preset-stage-2": "^6.13.0",
     "commander": "^2.9.0",
+    "image-to-ascii": "^3.0.3",
     "keypress": "^0.2.1",
     "najax": "^0.7.1",
     "sonos": "^0.12.1",
