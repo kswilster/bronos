@@ -52,24 +52,25 @@ const app = {
 
     const statusArray = [
       'Dandelion',
-      '    No song playing',
-      '    Volume: 0',
+      '    ► Clint Eastwood - Gorillaz',
+      '    Volume: 64',
       '    Shuffle: OFF',
       '    Repeat: NONE',
       '    Crossfade: OFF'
     ];
 
-    imageToAscii("http://www.nme.com/images/StrokesAngles600.jpg", {
+    imageToAscii("http://www.vblurpage.com/images/gorillaz_gorillaz_cd_cover_big.jpg", {
       bg: true,
       fg: false,
       stringify: false,
       concat: false,
       size: {
-        height: '32'
+        height: '40'
       }
     }, (err, converted) => {
       var matrixWithText = this.addTextToAscii(converted, statusArray, {
-        anchor: 'TOP_LEFT'
+        anchor: 'BOTTOM_RIGHT',
+        margin: { bottom: 1, right: 2 }
       })
       console.log(matrixWithText);
     });
