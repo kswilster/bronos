@@ -68,73 +68,78 @@ const app = {
         height: '32'
       }
     }, (err, converted) => {
-      var i = 0;
-       var statusArrayHeight = statusArray.length;
-       var statusArrayWidth = _.max(statusArray, (row) => {
-         return row.length;
-       }).length;
-
-       converted.forEach((cRow, rowIndex) => {
-         cRow.forEach((px, pxIndex) => {
-             const statusRow = statusArray[rowIndex];
-             const statusChar = statusRow && statusRow.charAt(pxIndex) || ' ';
-             if ((rowIndex < statusArrayHeight) && (pxIndex < statusArrayWidth)) {
-               px.pixel.r = 0;
-               px.pixel.g = 0;
-               px.pixel.b = 0;
-             }
-             px.char = statusChar;
-         });
-       });
-      // const matrixWithText = this.addTextToAscii(converted, statusArray)
-      console.log(stringify.stringifyMatrix(converted));
+      var matrixWithText = this.addTextToAscii(converted, statusArray, {
+        anchor: 'TOP_LEFT'
+      })
+      console.log(matrixWithText);
     });
   },
 
   // NOTE: anchor in ('TOP_LEFT', 'TOP_RIGHT', 'BOTTOM_LEFT', 'BOTTOM_RIGHT');
-  // addTextToAscii(ascii, textArray, { color, anchor, margin }) {
-  //   const color = color || { r: 0, g: 0, b: 0, a: 0 };
-  //   const anchor = anchor || 'TOP_LEFT';
-  //   const margin = margin || { top: 0, left: 0, bottom: 0, right: 0 };
-  //
-  //   var i = 0;
-  //   const asciiHeight = ascii.length;
-  //   const statusArrayHeight = statusArray.length;
-  //   const statusArrayWidth = _.max(statusArray, (row) => {
-  //     return row.length;
-  //   }).length;
-  //
-  //
-  //   var x0, x1, y0, y1;
-  //   switch(anchor) {
-  //     case 'TOP_LEFT':
-  //       x0 = margin.left;
-  //       y1 = margin.top;
-  //     case 'TOP_RIGHT':
-  //       x0 = 0;
-  //     case 'BOTTOM_LEFT':
-  //     case 'BOTTOM_RIGHT':
-  //     default:
-  //       console.err('invalid anchor: ' + anchor);
-  //   }
-  //
-  //   ascii.forEach((cRow, rowIndex) => {
-  //     cRow.forEach((px, pxIndex) => {
-  //         const statusRow = statusArray[rowIndex - 1];
-  //         const statusChar = statusRow && statusRow.charAt(pxIndex - 1) || ' ';
-  //         if ((rowIndex > 0)
-  //           && (rowIndex < statusArrayHeight + 1)
-  //           && (pxIndex > 0)
-  //           && (pxIndex < statusArrayWidth + 1)
-  //         ) {
-  //           px.pixel.r = 0;
-  //           px.pixel.g = 0;
-  //           px.pixel.b = 0;
-  //         }
-  //         px.char = statusChar;
-  //     });
-  //   });
-  // },
+  addTextToAscii(ascii, statusArray, { color, anchor, margin }={}) {
+    color = color || { r: 0, g: 0, b: 0, a: 0 };
+    anchor = anchor || 'TOP_LEFT';
+    margin = margin || { top: 0, left: 0, bottom: 0, right: 0 };
+
+    const asciiHeight = ascii.length;
+    const asciiWidth = ascii[0].length;
+    const statusArrayHeight = statusArray.length;
+    const statusArrayWidth = _.max(statusArray, (row) => {
+      return row.length;
+    }).length;
+
+    var x0, x1, y0, y1;
+    switch(anchor) {
+      case 'TOP_LEFT':
+        x0 = margin.left;
+        x1 = margin.left + statusArrayWidth;
+        y0 = margin.top;
+        y1 = margin.top + statusArrayHeight;
+        break;
+      case 'TOP_RIGHT':
+        x0 = asciiWidth - statusArrayWidth - margin.right;
+        x1 = asciiWidth - margin.right;
+        y0 = margin.top;
+        y1 = margin.top + statusArrayHeight;
+        break;
+      case 'BOTTOM_LEFT':
+        x0 = margin.left;
+        x1 = margin.left + statusArrayWidth;
+        y0 = asciiHeight - statusArrayHeight - margin.bottom;
+        y1 = asciiHeight - margin.bottom;
+        break;
+      case 'BOTTOM_RIGHT':
+        x0 = asciiWidth - statusArrayWidth - margin.right;
+        x1 = asciiWidth - margin.right;
+        y0 = asciiHeight - statusArrayHeight - margin.bottom;
+        y1 = asciiHeight - margin.bottom;
+        break;
+      default:
+        console.log('invalid anchor: ' + anchor);
+    }
+
+    function inBoundedBox(x, y, x0, x1, y0, y1) {
+      return (x >= x0 && x < x1 && y >= y0 && y < y1);
+    }
+
+    ascii.forEach((cRow, rowIndex) => {
+      cRow.forEach((px, pxIndex) => {
+        if (inBoundedBox(pxIndex, rowIndex, x0, x1, y0, y1)) {
+          const statusRow = statusArray[rowIndex - y0];
+          const statusChar = statusRow && statusRow.charAt(pxIndex - x0) || ' ';
+          px.pixel.r = color.r;
+          px.pixel.g = color.g;
+          px.pixel.b = color.b;
+          px.pixel.a = color.a;
+          px.char = statusChar;
+        } else {
+          px.char = ' ';
+        }
+      });
+    });
+
+    return stringify.stringifyMatrix(ascii);
+  },
 
   getSonosDiscovery: function() {
     const settings = {
