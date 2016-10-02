@@ -8,7 +8,9 @@
     "watch": "node_modules/.bin/babel src -d dist -w",
     "test": "echo \"Error: no test specified\" && exit 1",
     "bronos": "node ./dist/bronos.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "postinstall": "scripts/install-fzf",
+    "preuninstall": "scripts/uninstall-fzf"
   },
   "bin": {
     "bronos": "./dist/bronos.js"

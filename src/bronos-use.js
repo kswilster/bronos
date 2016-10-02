@@ -84,31 +84,10 @@ const app = {
       fzfInput += `${index}: ${zone.roomName}\n`;
     });
 
-    const result = await this.startFzf(fzfInput);
+    const result = await Utils.startFzf(fzfInput);
     const index = result.split(':')[0];
     const zone = zones[index];
     return zone;
-  },
-
-  startFzf: async function(entries, multiple=false) {
-    const fzfCommand = multiple ? 'fzf -m' : 'fzf';
-    const fzf = spawn(`echo "${entries}" | ${fzfCommand}`, {
-      stdio: ['inherit', 'pipe', 'inherit'],
-      shell: true
-    });
-
-    fzf.stdout.setEncoding('utf-8');
-
-    const promise = new Promise(function(resolve, reject) {
-      fzf.stdout.on('readable', () => {
-        const value = fzf.stdout.read();
-        if (value !== null) {
-          resolve(value);
-        }
-      });
-    });
-
-    return promise;
   },
 
   startSonosServer: async function() {

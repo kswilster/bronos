@@ -5,6 +5,7 @@ var webroot = path.resolve(__dirname, 'static');
 var SonosDiscovery = require('sonos-discovery');
 var fs = require('fs');
 var os = require('os');
+var spawn = require('child_process').spawn;
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
@@ -59,6 +60,28 @@ const Utils = {
 
     const discovery = new SonosDiscovery(settings);
     return discovery;
+  },
+
+  startFzf: async function(entries, multiple=false) {
+    // TODO: handle project root better
+    const fzfCommand = multiple ? `${__dirname}/../bin/fzf -m` : `${__dirname}/../bin/fzf`;
+    const fzf = spawn(`echo "${entries}" | ${fzfCommand}`, {
+      stdio: ['inherit', 'pipe', 'inherit'],
+      shell: true
+    });
+
+    fzf.stdout.setEncoding('utf-8');
+
+    const promise = new Promise(function(resolve, reject) {
+      fzf.stdout.on('readable', () => {
+        const value = fzf.stdout.read();
+        if (value !== null) {
+          resolve(value);
+        }
+      });
+    });
+
+    return promise;
   }
 };
 

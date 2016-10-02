@@ -3,7 +3,8 @@ require('babel-polyfill');
 var SpotifyWebApi = require('spotify-web-api-node');
 var Sonos = require('sonos');
 var program = require('commander');
-var spawn = require('child_process').spawn;
+
+import Utils from './utils';
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -56,7 +57,7 @@ const app = {
       fzfInput += `${index}: ${artist.name}\n`;
     })
 
-    const result = await this.startFzf(fzfInput);
+    const result = await Utils.startFzf(fzfInput);
     const index = result.split(':')[0];
     const artist = artists[index];
     return artist.id;
@@ -76,7 +77,7 @@ const app = {
       fzfInput += `${index}: ${album.name}\n`;
     })
 
-    const result = await this.startFzf(fzfInput);
+    const result = await Utils.startFzf(fzfInput);
     const index = result.split(':')[0];
     const album = albums[index];
     return album.id;
@@ -89,7 +90,7 @@ const app = {
       fzfInput += `${index}: ${track.artists[0].name}\t\t${track.name}\n`;
     });
 
-    const result = await this.startFzf(fzfInput, true);
+    const result = await Utils.startFzf(fzfInput, true);
     const lines = result.split('\n');
     lines.shift();
     const chosenTrackIds = [];
@@ -139,27 +140,6 @@ const app = {
   getAlbumTracks: async function(albumId) {
     const { body: { items } } = await spotifyApi.getAlbumTracks(albumId);
     return items;
-  },
-
-  startFzf: async function(entries, multiple=false) {
-    const fzfCommand = multiple ? 'fzf -m' : 'fzf';
-    const fzf = spawn(`echo "${entries}" | ${fzfCommand}`, {
-      stdio: ['inherit', 'pipe', 'inherit'],
-      shell: true
-    });
-
-    fzf.stdout.setEncoding('utf-8');
-
-    const promise = new Promise(function(resolve, reject) {
-      fzf.stdout.on('readable', () => {
-        const value = fzf.stdout.read();
-        if (value !== null) {
-          resolve(value);
-        }
-      });
-    });
-
-    return promise;
   }
 }
 

@@ -1,0 +1,2 @@
+fzf_base=$(pwd)
+rm -f "$fzf_base"/bin/fzf*
