@@ -50,9 +50,9 @@ const app = {
     const zone = config.zone;
     // NOTE: for testing
     const playbackStateIcon = '►';
-    const artist = 'Nirvana';
-    const album = 'Nevermind';
-    const track = 'Smells Like Teen Spirit';
+    const artist = 'Drake';
+    const album = 'Nothing Was the Same';
+    const track = 'Started From the Bottom';
 
     // const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
     // const artist = zone.state.currentTrack.artist;
