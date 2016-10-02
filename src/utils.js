@@ -64,7 +64,8 @@ const Utils = {
 
   startFzf: async function(entries, multiple=false) {
     // TODO: handle project root better
-    const fzfCommand = multiple ? `${__dirname}/../bin/fzf -m` : `${__dirname}/../bin/fzf`;
+    const fzfPath = path.normalize(`${__dirname}/../bin/fzf`);
+    const fzfCommand = multiple ? `${fzfPath} -m` : `${fzfPath}`;
     const fzf = spawn(`echo "${entries}" | ${fzfCommand}`, {
       stdio: ['inherit', 'pipe', 'inherit'],
       shell: true
