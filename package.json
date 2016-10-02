@@ -5,6 +5,7 @@
   "main": "dist/bronos.js",
   "scripts": {
     "build": "node_modules/.bin/babel src -d dist",
+    "watch": "node_modules/.bin/babel src -d dist -w",
     "test": "echo \"Error: no test specified\" && exit 1",
     "bronos": "node ./dist/bronos.js",
     "prepublish": "npm run build"
