@@ -2,6 +2,7 @@ require('babel-polyfill');
 import _ from 'underscore';
 import request from 'request';
 import najax from 'najax';
+import Utils from './utils';
 
 var os = require('os');
 var fs = require('fs');
@@ -37,12 +38,14 @@ const app = {
     await this.startSonosServer();
     // TODO: why is this necessary?
     await sleep(1000);
+    var zones = [];
 
     try {
-      const zones = await this.getZones();
+      zones = await this.getZones();
     } catch (e) {
       handleError(e);
     }
+    console.log('zones: ' + zones.length);
     const zone = await this.chooseZone(zones);
 
     var config;
@@ -62,11 +65,11 @@ const app = {
     const promise = new Promise(function(resolve, reject) {
       const timeout = setTimeout(() => {
         reject('No Sonos devices found');
-      }, 3000);
+      }, 5000);
 
       najax.get('http://localhost:5005/zones', function(response) {
         const parsedResponse = JSON.parse(response);
-        const zones = [];
+        var zones = [];
         for (const entry of parsedResponse) {
           zones.push(entry.members[0]);
         }

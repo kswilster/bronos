@@ -13,10 +13,11 @@ process.on('uncaughtException', (err) => {
 
 const Utils = {
   getCurrentPlayer: async function() {
-    const discovery = this.getSonosDiscovery();
+    const discovery = await this.getSonosDiscovery();
     const config = await this.readConfig();
+    // await Utils.sleep(2000);
 
-    const player = discovery.getPlayerByUUID(config.zone.uuid);
+    const player = discovery.getPlayer(config.zone.roomName);
     if (player) {
       return player;
     } else {
@@ -49,17 +50,34 @@ const Utils = {
     return promise;
   },
 
-  getSonosDiscovery: function() {
+  getSonosDiscovery: async function() {
     const settings = {
-      port: 5005,
-      securePort: 5006,
+      port: 5015,
+      securePort: 5016,
       cacheDir: './cache',
       webroot: webroot,
       announceVolume: 40
     };
 
     const discovery = new SonosDiscovery(settings);
-    return discovery;
+
+    const promise = new Promise((resolve, reject) => {
+      const discoverInterval = setInterval(function() {
+        if (discovery.players.length) {
+          resolve(discovery);
+          clearInterval(discoverInterval);
+          clearTimeout(timeout);
+        }
+      }, 50);
+
+      const timeout = setTimeout(function() {
+        reject('Could not start Sonos Discovery');
+        clearInterval(discoverInterval);
+        clearTimeout(timeout);
+      }, 5000);
+    });
+
+    return promise;
   },
 
   startFzf: async function(entries, multiple=false) {

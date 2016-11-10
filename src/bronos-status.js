@@ -1,5 +1,6 @@
 require('babel-polyfill');
 import _ from 'underscore';
+import Utils from './utils';
 import najax from 'najax';
 
 var os = require('os');
@@ -37,30 +38,25 @@ function sleep(timeout) {
 // NOTE: crossFade: true/false
 const app = {
   run: async function() {
-    var config;
-
-    try {
-      config = await this.readConfig();
-    } catch (e) {
-      console.log(e);
-      console.log('failed to read sonos data');
-      return;
-    }
-
-    const zone = config.zone;
+    const zone = await Utils.getCurrentPlayer();
+    await sleep(1000);
     // NOTE: for testing
-    const playbackStateIcon = '►';
-    const artist = 'Drake';
-    const album = 'Nothing Was the Same';
-    const track = 'Started From the Bottom';
+    // const playbackStateIcon = '►';
+    // const artist = 'Drake';
+    // const album = 'Nothing Was the Same';
+    // const track = 'Started From the Bottom';
+    // const shuffleState = 'OFF';
+    // const crossfadeState = 'OFF';
+    // const repeatState = 'OFF';
 
-    // const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
-    // const artist = zone.state.currentTrack.artist;
-    // const album = zone.state.currentTrack.album;
-    // const track = zone.state.currentTrack.title;
+    // console.log(JSON.stringify(zone));
+    const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
+    const artist = zone.state.currentTrack.artist;
+    const album = zone.state.currentTrack.album;
+    const track = zone.state.currentTrack.title;
     const shuffleState = zone.state.playMode.shuffle ? 'ON' : 'OFF';
     const crossfadeState = zone.state.playMode.crossfade ? 'ON' : 'OFF';
-    const repeatState = zone.state.playMode.repeat.toUpperCase();
+    const repeatState = zone.state.playMode.repeat ? 'ON' : 'OFF';
 
     const playbackStateText = `${playbackStateIcon} ${track} - ${artist}`;
     const volumeText = `Volume: ${zone.state.volume}`;
@@ -102,22 +98,6 @@ const app = {
         resolve(JSON.parse(response));
       });
     });
-    return promise;
-  },
-
-  readConfig: async function() {
-    const promise = new Promise((resolve, reject) => {
-      fs.readFile(`${os.homedir()}/.bronos`, (err, data) => {
-        if (err) reject(err);
-
-        if (data && data.length) {
-          resolve(JSON.parse(data));
-        } else {
-          reject();
-        }
-      });
-    });
-
     return promise;
   },
 
