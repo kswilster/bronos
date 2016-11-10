@@ -22,8 +22,8 @@ const Utils = {
   getCurrentZone: async function() {
     await this.startSonosServer();
     const config = await this.readConfig();
+    const zone = await this.getZone(config.zone.roomName);
 
-    const zone = this.getZone(config.zone.roomName);
     if (zone) {
       return zone;
     } else {
@@ -55,17 +55,40 @@ const Utils = {
     return promise;
   },
 
-  getZone: async function(zoneName) {
+  getZones: async function() {
     const promise = new Promise(function(resolve, reject) {
       const timeout = setTimeout(() => {
         reject('No Sonos devices found');
       }, 5000);
 
-      najax.get(`http://localhost:5005/zones/${zoneName}`, function(response) {
+      najax.get('http://localhost:5005/zones', function(response) {
         clearTimeout(timeout);
-
         const parsedResponse = JSON.parse(response);
-        resolve(parsedResponse[0].members[0]);
+        var zones = [];
+        for (const entry of parsedResponse) {
+          zones.push(entry.members[0]);
+        }
+        resolve(zones);
+      });
+    });
+
+    return promise;
+  },
+
+  getZone: async function(zoneName) {
+    const zones = await this.getZones();
+    return zones.find((zone) => { return zone.roomName === zoneName });
+  },
+
+  queueTrack: async function(zoneName, trackId) {
+    const promise = new Promise(function(resolve, reject) {
+      const timeout = setTimeout(() => {
+        reject('No Sonos devices found');
+      }, 5000);
+
+      najax.get(`http://localhost:5005/spotify/${zoneName}/queue/spotify:track:${trackId}`, function() {
+        clearTimeout(timeout);
+        resolve();
       });
     });
 

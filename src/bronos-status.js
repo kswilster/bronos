@@ -75,10 +75,15 @@ const app = {
     statusArray.push(`    ${repeatText}`);
     statusArray.push(`    ${crossfadeText}`);
 
+    // TODO: handle album art failure better
     if (album && album.length) {
-      const albumArtUrl = await this.getAlbumArtURL(artist, album);
-      const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
-      console.log(albumArt);
+      try {
+        const albumArtUrl = await this.getAlbumArtURL(artist, album);
+        const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
+        console.log(albumArt);
+      } catch (e) {
+        console.log(statusArray.join('\n'));
+      }
     } else {
       console.log(statusArray.join('\n'));
     }

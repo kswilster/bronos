@@ -19,6 +19,15 @@ const app = {
     }
   },
 
+  _queueTracks: async function(trackIds) {
+    const zone = await Utils.getCurrentZone();
+    const zoneName = zone.roomName;
+
+    trackIds.forEach(async function(trackId) {
+      await Utils.queueTrack(zoneName, trackId);
+    });
+  },
+
   searchByArtist: async function(query) {
     const artists = await this.findArtists(query);
     const artistId = await this.chooseArtist(artists);
@@ -33,7 +42,7 @@ const app = {
     }
 
     const trackIds = await this.chooseTracks(tracks);
-    console.log(trackIds);
+    this._queueTracks(trackIds);
   },
 
   searchByAlbum: async function(query) {
@@ -41,13 +50,13 @@ const app = {
     const albumId = await this.chooseAlbum(albums);
     const tracks = await this.getAlbumTracks(albumId);
     const trackIds = await this.chooseTracks(tracks);
-    console.log(trackIds);
+    this._queueTracks(trackIds);
   },
 
   searchByTrack: async function(query) {
     const tracks = await this.findTracks(query);
     const trackIds = await this.chooseTracks(tracks);
-    console.log(trackIds);
+    this._queueTracks(trackIds);
   },
 
   chooseArtist: async function(artists) {
