@@ -38,8 +38,7 @@ function sleep(timeout) {
 // NOTE: crossFade: true/false
 const app = {
   run: async function() {
-    const zone = await Utils.getCurrentPlayer();
-    await sleep(1000);
+    const zone = await Utils.getCurrentZone();
     // NOTE: for testing
     // const playbackStateIcon = '►';
     // const artist = 'Drake';

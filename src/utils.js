@@ -1,8 +1,9 @@
 require('babel-polyfill');
 
+import najax from 'najax';
+
 var path = require('path');
 var webroot = path.resolve(__dirname, 'static');
-var SonosDiscovery = require('sonos-discovery');
 var fs = require('fs');
 var os = require('os');
 
@@ -17,17 +18,16 @@ const APP_ID = 'com.lintcondition.bronos';
 const SONOS_SERVER_PORT = '5005';
 
 const Utils = {
-  getCurrentPlayer: async function() {
-    const discovery = await this.getSonosDiscovery();
-    const config = await this.readConfig();
-    // await Utils.sleep(2000);
 
-    const player = discovery.getPlayer(config.zone.roomName);
-    if (player) {
-      return player;
+  getCurrentZone: async function() {
+    await this.startSonosServer();
+    const config = await this.readConfig();
+
+    const zone = this.getZone(config.zone.roomName);
+    if (zone) {
+      return zone;
     } else {
-      console.log('No players found');
-      process.exit();
+      console.log('No zones found');
     }
   },
 
@@ -55,13 +55,29 @@ const Utils = {
     return promise;
   },
 
+  getZone: async function(zoneName) {
+    const promise = new Promise(function(resolve, reject) {
+      const timeout = setTimeout(() => {
+        reject('No Sonos devices found');
+      }, 5000);
+
+      najax.get(`http://localhost:5005/zones/${zoneName}`, function(response) {
+        clearTimeout(timeout);
+
+        const parsedResponse = JSON.parse(response);
+        resolve(parsedResponse[0].members[0]);
+      });
+    });
+
+    return promise;
+  },
+
   startSonosServer: async function() {
     // TODO: ensure this method is idempotent
     // TODO: use webhook to determine that the sonos server is ready (for now just sleeping)
     // TODO: be more discerning with identifying the sonos server process
     const openNetworkFiles = execSync(`lsof -i -n -P`);
     const serverRunning = openNetworkFiles.includes(SONOS_SERVER_PORT);
-    console.log(serverRunning);
 
     if (!serverRunning) {
       const sonosServerPath = path.normalize(`${__dirname}/../node_modules/sonos-http-api/server.js`);
@@ -75,31 +91,46 @@ const Utils = {
     }
   },
 
-  getSonosDiscovery: async function() {
-    const settings = {
-      port: 5015,
-      securePort: 5016,
-      cacheDir: './cache',
-      webroot: webroot,
-      announceVolume: 40
-    };
+  wipStartSonosServer: async function() {
+    const promise = new Promise(function(resolve) {
+      // TODO: spawn this from node_modules directory for portability
+      sonosServer = spawn('node ~/dev/node-sonos-http-api/server.js', {
+        stdio: ['inherit', 'pipe', 'pipe'],
+        shell: true
+      });
 
-    const discovery = new SonosDiscovery(settings);
+      var lastError;
 
-    const promise = new Promise((resolve, reject) => {
-      const discoverInterval = setInterval(function() {
-        if (discovery.players.length) {
-          resolve(discovery);
-          clearInterval(discoverInterval);
-          clearTimeout(timeout);
-        }
-      }, 50);
+      // shutdown sonosServer if it is not available after 10 seconds
+      const timeout = setTimeout(() => {
+        sonosServer.kill('SIGKILL');
+        console.log('failed to start sonos server');
+      }, 3000);
 
-      const timeout = setTimeout(function() {
-        reject('Could not start Sonos Discovery');
-        clearInterval(discoverInterval);
+      sonosServer.on('exit', (code, signal) => {
+        console.log('sonos server shut down');
+        console.log(lastError);
         clearTimeout(timeout);
-      }, 5000);
+        return;
+      });
+
+      sonosServer.stdout.setEncoding('utf-8');
+      sonosServer.stderr.setEncoding('utf-8');
+
+      sonosServer.stdout.on('readable', () => {
+        const value = sonosServer.stdout.read();
+        if (value && value.includes('listening')) {
+          clearTimeout(timeout);
+          resolve();
+        }
+      });
+
+      sonosServer.stderr.on('readable', () => {
+        const err = sonosServer.stderr.read();
+        if (err && err.length) {
+          lastError = err;
+        }
+      });
     });
 
     return promise;
