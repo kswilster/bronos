@@ -5,11 +5,16 @@ var webroot = path.resolve(__dirname, 'static');
 var SonosDiscovery = require('sonos-discovery');
 var fs = require('fs');
 var os = require('os');
-var spawn = require('child_process').spawn;
+
+var { spawn, exec, execSync } = require('child_process');
+var Preferences = require('preferences');
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
 });
+
+const APP_ID = 'com.lintcondition.bronos';
+const SONOS_SERVER_PORT = '5005';
 
 const Utils = {
   getCurrentPlayer: async function() {
@@ -48,6 +53,25 @@ const Utils = {
     });
 
     return promise;
+  },
+
+  startSonosServer: async function() {
+    // TODO: ensure this method is idempotent
+    // TODO: use webhook to determine that the sonos server is ready (for now just sleeping)
+    // TODO: be more discerning with identifying the sonos server process
+    const openNetworkFiles = execSync(`lsof -i -n -P`);
+    const serverRunning = openNetworkFiles.includes(SONOS_SERVER_PORT);
+    console.log(serverRunning);
+
+    if (!serverRunning) {
+      const sonosServerPath = path.normalize(`${__dirname}/../node_modules/sonos-http-api/server.js`);
+      const server = spawn(process.argv[0], [sonosServerPath], {
+        detached: true,
+      });
+
+      server.unref();
+      await this.sleep(1000);
+    }
   },
 
   getSonosDiscovery: async function() {
