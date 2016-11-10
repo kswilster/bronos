@@ -67,6 +67,7 @@ const Utils = {
       const sonosServerPath = path.normalize(`${__dirname}/../node_modules/sonos-http-api/server.js`);
       const server = spawn(process.argv[0], [sonosServerPath], {
         detached: true,
+        stdio: 'ignore'
       });
 
       server.unref();
