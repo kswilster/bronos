@@ -38,17 +38,27 @@ function sleep(timeout) {
 // NOTE: crossFade: true/false
 const app = {
   run: async function() {
-    const zone = await Utils.getCurrentZone();
-    // NOTE: for testing
-    // const playbackStateIcon = '►';
-    // const artist = 'Drake';
-    // const album = 'Nothing Was the Same';
-    // const track = 'Started From the Bottom';
-    // const shuffleState = 'OFF';
-    // const crossfadeState = 'OFF';
-    // const repeatState = 'OFF';
+    const fakeZone = {
+      roomName: 'Living Room',
+      state: {
+        playbackState: 'PLAYING',
+        currentTrack: {
+          artist: 'Drake',
+          album: 'Nothing Was the Same',
+          title: 'Started From the Bottom'
+        },
+        playMode: {
+          shuffle: false,
+          crossFade: true,
+          repeat: false
+        },
+        volume: 65
+      }
+    };
 
-    // console.log(JSON.stringify(zone));
+    const testing = false;
+    const zone = testing ? fakeZone : await Utils.getCurrentZone();
+
     const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
     const artist = zone.state.currentTrack.artist;
     const album = zone.state.currentTrack.album;
@@ -78,7 +88,8 @@ const app = {
     // TODO: handle album art failure better
     if (album && album.length) {
       try {
-        const albumArtUrl = await this.getAlbumArtURL(artist, album);
+        // const albumArtUrl = await this.getAlbumArtURL(artist, album);
+        const albumArtUrl = 'http://content.whas11.com/photo/2016/09/09/red_river_gorge_1473447099143_5985427_ver1.0.jpg';
         const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
         console.log(albumArt);
       } catch (e) {

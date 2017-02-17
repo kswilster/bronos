@@ -8,8 +8,14 @@ import Utils from './utils';
 
 const spotifyApi = new SpotifyWebApi();
 
+process.on('uncaughtException', (err) => {
+  fs.writeSync(1, `Caught exception: ${err}`);
+});
+
 const app = {
-  run(query, { type='track' }) {
+  run: async function(query, { type='track' }) {
+    await Utils.startSonosServer();
+
     if (type === 'artist') {
       this.searchByArtist(query);
     } else if (type === 'album') {

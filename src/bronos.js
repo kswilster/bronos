@@ -4,7 +4,8 @@ require('babel-polyfill');
 var program = require('commander');
 
 program
-  // .command('play <query>', 'play one or more songs immediately')
+  .command('play', 'play the next song in the queue')
+  .command('pause', 'oh you know')
   .command('next', 'skip ahead to next track')
   .command('prev', 'go back one track')
   .command('queue <query>', 'queue one or more songs')

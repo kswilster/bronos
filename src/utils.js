@@ -1,6 +1,7 @@
 require('babel-polyfill');
 
 import najax from 'najax';
+import axios from 'axios';
 
 var path = require('path');
 var webroot = path.resolve(__dirname, 'static');
@@ -57,14 +58,10 @@ const Utils = {
 
   getZones: async function() {
     const promise = new Promise(function(resolve, reject) {
-      const timeout = setTimeout(() => {
-        reject('No Sonos devices found');
-      }, 5000);
 
       najax.get('http://localhost:5005/zones', function(response) {
-        clearTimeout(timeout);
         const parsedResponse = JSON.parse(response);
-        var zones = [];
+        const zones = [];
         for (const entry of parsedResponse) {
           zones.push(entry.members[0]);
         }
@@ -82,12 +79,10 @@ const Utils = {
 
   queueTrack: async function(zoneName, trackId) {
     const promise = new Promise(function(resolve, reject) {
-      const timeout = setTimeout(() => {
-        reject('No Sonos devices found');
-      }, 5000);
 
-      najax.get(`http://localhost:5005/spotify/${zoneName}/queue/spotify:track:${trackId}`, function() {
-        clearTimeout(timeout);
+      const url = encodeURI(`http://localhost:5005/${zoneName}/spotify/queue/spotify:track:${trackId}`);
+
+      axios.get(url, function() {
         resolve();
       });
     });

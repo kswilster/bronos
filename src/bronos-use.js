@@ -61,15 +61,19 @@ const app = {
         reject('No Sonos devices found');
       }, 5000);
 
-      najax.get('http://localhost:5005/zones', function(response) {
-        clearTimeout(timeout);
-        const parsedResponse = JSON.parse(response);
-        var zones = [];
-        for (const entry of parsedResponse) {
-          zones.push(entry.members[0]);
-        }
-        resolve(zones);
-      });
+      najax.get('http://localhost:5005/zones')
+        .success(function(response) {
+          clearTimeout(timeout);
+          const parsedResponse = JSON.parse(response);
+          var zones = [];
+          for (const entry of parsedResponse) {
+            zones.push(entry.members[0]);
+          }
+          resolve(zones);
+        })
+        .error(function(error) {
+          reject(error);
+        });
     });
 
     return promise;

@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "asciify-pixel-matrix": "^1.0.4",
+    "axios": "^0.15.2",
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
     "babel-polyfill": "^6.13.0",
@@ -28,8 +29,7 @@
     "image-to-ascii": "^3.0.3",
     "najax": "^0.7.1",
     "sonos": "^0.12.1",
-    "sonos-discovery": "https://github.com/jishi/node-sonos-discovery/archive/v1.0.0-beta.16.tar.gz",
-    "sonos-http-api": "https://github.com/jishi/node-sonos-http-api/archive/v1.0.0-beta.16.tar.gz",
+    "sonos-http-api": "https://github.com/jishi/node-sonos-http-api/archive/master.tar.gz",
     "spotify-web-api-node": "^2.3.5",
     "underscore": "^1.8.3",
     "webpack": "^1.13.2"
