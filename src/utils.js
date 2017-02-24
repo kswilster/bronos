@@ -77,6 +77,20 @@ const Utils = {
     return zones.find((zone) => { return zone.roomName === zoneName });
   },
 
+  getQueue: async function(zoneName) {
+    const url = encodeURI(`http://localhost:5005/${zoneName}/queue`);
+    const response = await axios.get(url);
+    return response.data;
+  },
+
+  reorderTracksInQueue: async function(zoneName, startIndex, numberOfTracks, insertBefore) {
+    // Sonos API is indexed at 1, that's no fun
+    insertBefore++;
+    const url = encodeURI(`http://localhost:5005/${zoneName}/reorder/${startIndex}/${numberOfTracks}/${insertBefore}`);
+    console.log(url);
+    return axios.get(url);
+  },
+
   queueTrack: async function(zoneName, trackId) {
     const promise = new Promise(function(resolve, reject) {
 

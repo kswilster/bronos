@@ -1,9 +1,11 @@
 #! /usr/bin/env node
 require('babel-polyfill');
+require("better-stack-traces").register();
 
 var program = require('commander');
 
 program
+  .command('add', 'add one or more songs to the selected room')
   .command('play', 'continue playing music in the selected room')
   .command('pause', 'pause music in the selected room')
   .command('next', 'skip ahead to next track')
