@@ -88,8 +88,8 @@ const app = {
     // TODO: handle album art failure better
     if (album && album.length) {
       try {
-        // const albumArtUrl = await this.getAlbumArtURL(artist, album);
-        const albumArtUrl = 'http://content.whas11.com/photo/2016/09/09/red_river_gorge_1473447099143_5985427_ver1.0.jpg';
+        const albumArtUrl = await this.getAlbumArtURL(artist, album);
+        // const albumArtUrl = 'http://content.whas11.com/photo/2016/09/09/red_river_gorge_1473447099143_5985427_ver1.0.jpg';
         const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
         console.log(albumArt);
       } catch (e) {

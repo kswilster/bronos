@@ -3,6 +3,7 @@ import _ from 'underscore';
 import request from 'request';
 import najax from 'najax';
 import Utils from './utils';
+import program from 'commander';
 
 var os = require('os');
 var fs = require('fs');
@@ -118,5 +119,24 @@ const app = {
     return promise;
   }
 };
+
+program.action(function() {
+  app.run();
+});
+
+// completely custom help
+if( process.argv.indexOf( '-h' ) !== -1 || process.argv.indexOf( '--help' ) !== -1 ) {
+	const position = process.argv.indexOf( '-h' ) !== -1 ? process.argv.indexOf( '-h' ) : process.argv.indexOf( '--help' );
+
+	process.argv.splice( position, 1 );
+  console.log('');
+  console.log('  Usage: bronos use');
+  console.log('');
+  console.log('  Select a Sonos Controller to use');
+  exit();
+}
+
+program.parse(process.argv);
+
 
 app.run();
