@@ -57,19 +57,20 @@ const Utils = {
   },
 
   getZones: async function() {
-    const promise = new Promise(function(resolve, reject) {
+    const url = 'http://localhost:5005/zones';
+    const zones = [];
 
-      najax.get('http://localhost:5005/zones', function(response) {
-        const parsedResponse = JSON.parse(response);
-        const zones = [];
-        for (const entry of parsedResponse) {
-          zones.push(entry.members[0]);
-        }
-        resolve(zones);
-      });
-    });
+    try {
+      const { data } = await axios.get(url);
+      for (const entry of data) {
+        // TODO: might not be members I want, look into grouped controllers...
+        zones.push(entry.members[0]);
+      }
 
-    return promise;
+      return zones;
+    } catch (error) {
+      this.handleAxiosError(error);
+    }
   },
 
   getZone: async function(zoneName) {
@@ -83,6 +84,11 @@ const Utils = {
     return response.data;
   },
 
+  say: async function(zoneName, message) {
+    const url = encodeURI(`http://localhost:5005/${zoneName}/say/${message}`);
+    return axios.get(url);
+  },
+
   reorderTracksInQueue: async function(zoneName, startIndex, numberOfTracks, insertBefore) {
     // Sonos API is indexed at 1, that's no fun
     insertBefore++;
@@ -91,10 +97,15 @@ const Utils = {
     return axios.get(url);
   },
 
-  queueTrack: async function(zoneName, trackId) {
+  queueTrack: async function(zoneName, trackId, index) {
+    // Sonos API is indexed at 1, that's no fun
+    index++;
+
     const promise = new Promise(function(resolve, reject) {
 
-      const url = encodeURI(`http://localhost:5005/${zoneName}/spotify/queue/spotify:track:${trackId}`);
+      const baseUrl = `http://localhost:5005/${zoneName}/spotify/queue/spotify:track:${trackId}`;
+      const indexParam = index ? `/${index}` : '';
+      const url = encodeURI(`${baseUrl}${indexParam}`);
 
       axios.get(url, function() {
         resolve();
@@ -107,11 +118,8 @@ const Utils = {
   startSonosServer: async function() {
     // TODO: ensure this method is idempotent
     // TODO: use webhook to determine that the sonos server is ready (for now just sleeping)
-    // TODO: be more discerning with identifying the sonos server process
-    const openNetworkFiles = execSync(`lsof -i -n -P`);
-    const serverRunning = openNetworkFiles.includes(SONOS_SERVER_PORT);
 
-    if (!serverRunning) {
+    if (!this.isSonosServerRunning()) {
       const sonosServerPath = path.normalize(`${__dirname}/../node_modules/sonos-http-api/server.js`);
       const server = spawn(process.argv[0], [sonosServerPath], {
         detached: true,
@@ -120,7 +128,20 @@ const Utils = {
 
       server.unref();
       await this.sleep(1000);
+
+      if (!this.isSonosServerRunning()) {
+        console.error('Failed to start sonos server');
+        process.exit();
+      }
     }
+    console.log('sonos server started');
+  },
+
+  isSonosServerRunning() {
+    // TODO: be more discerning with identifying the sonos server process
+    const openNetworkFiles = execSync(`lsof -i -n -P`).toString();
+    const serverRunning = openNetworkFiles.match(/:5005\b/);
+    return serverRunning;
   },
 
   wipStartSonosServer: async function() {
@@ -189,7 +210,19 @@ const Utils = {
     });
 
     return promise;
-  }
+  },
+
+  handleAxiosError: function(error) {
+    if (error && error.response) {
+      const status = error.response.status;
+      const statusText = error.response.statusText;
+      const errorMessage = error.response.data.error;
+      console.error(`${status}: ${statusText}`);
+      console.error(errorMessage);
+    }
+
+    process.exit();
+  },
 };
 
 export default Utils;

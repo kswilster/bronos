@@ -44,7 +44,7 @@ const app = {
     }
 
     if (!['track', 'artist', 'album'].includes(type)) {
-      console.error(`invalid resource type: ${type}. Try 'track', 'album', or 'artist'.`);
+      console.error(`invalid resource type: '${type}'. Try 'track', 'album', or 'artist'.`);
       process.exit(1);
     }
 
@@ -55,19 +55,15 @@ const app = {
   },
 
   _queueTracks: async function(zoneName, trackIds, index=-1, queueLength) {
-    var queuedTrackCount = 0;
+    if (index === -1) {
+      index = queueLength;
+    }
 
     trackIds.forEach(async function(trackId) {
-      await Utils.queueTrack(zoneName, trackId);
-      queuedTrackCount++;
+      console.log(`queueTracks ${zoneName} ${trackIds} ${index} ${queueLength}`);
+      await Utils.queueTrack(zoneName, trackId, index);
+      index++;
     });
-
-    if (index !== -1) {
-      // use old queueLength as starting position for tracks
-      // there's a race condition if tracks are moved around between queueing and reordering
-      // TODO: ¯\_(ツ)_/¯
-      await Utils.reorderTracksInQueue(zoneName, queueLength, 1, index);
-    }
   },
 
   searchByArtist: async function(query) {

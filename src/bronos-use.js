@@ -15,7 +15,7 @@ process.on('uncaughtException', (err) => {
 });
 
 function handleError (err) {
-  console.error('ERROR: ' + err);
+  console.log(err);
   exit();
 }
 
@@ -37,11 +37,10 @@ const app = {
     var zones = [];
 
     try {
-      zones = await this.getZones();
+      zones = await Utils.getZones();
     } catch (e) {
       handleError(e);
     }
-    console.log('zones: ' + zones.length);
     const zone = await this.chooseZone(zones);
 
     var config;
@@ -52,7 +51,7 @@ const app = {
     }
 
     await this.writeConfig({ ...config, zone });
-
+    console.log(`Switched to zone: ${zone.roomName}`);
     process.exit(1);
   },
 

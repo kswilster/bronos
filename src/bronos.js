@@ -11,6 +11,7 @@ program
   .command('next', 'skip ahead to next track')
   .command('prev', 'go back one track')
   .command('queue <query>', 'queue one or more songs')
+  .command('say <message>', 'annoy your neighbors')
   // .command('list', 'list available devices and groups')
   .command('status', 'show current device status')
   .command('use', 'select a device or group')
