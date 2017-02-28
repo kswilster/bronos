@@ -50,6 +50,25 @@ const Utils = {
     });
   },
 
+
+  pollCondition: async function(callback, {
+    maxTries = 50,
+    interval = 50,
+    message,
+  } = {}) {
+
+    for (let tries = 0; tries < maxTries; tries++) {
+      const result = callback();
+      if (result) {
+        return result;
+      } else {
+        await this.sleep(interval);
+      }
+    }
+
+    throw new Error(`Condition failed to come true${message ? `: ${message}` : ''}`);
+  },
+
   getZones: async function() {
     const url = 'http://localhost:5005/zones';
     const zones = [];
@@ -77,6 +96,16 @@ const Utils = {
     const url = encodeURI(`http://localhost:5005/${zoneName}/queue`);
     const response = await axios.get(url);
     return response.data;
+  },
+
+  play: async function(zoneName) {
+    const url = encodeURI(`http://localhost:5005/${zoneName}/play`);
+    return axios.get(url);
+  },
+
+  pause: async function(zoneName) {
+    const url = encodeURI(`http://localhost:5005/${zoneName}/pause`);
+    return axios.get(url);
   },
 
   say: async function(zoneName, message) {
@@ -122,9 +151,10 @@ const Utils = {
       });
 
       server.unref();
-      await this.sleep(1000);
 
-      if (!this.isSonosServerRunning()) {
+      try {
+        await this.pollCondition(this.isSonosServerRunning, { message: 'Failed to start sonos server' });
+      } catch (e) {
         console.error('Failed to start sonos server');
         process.exit();
       }
@@ -134,8 +164,13 @@ const Utils = {
   isSonosServerRunning() {
     // TODO: be more discerning with identifying the sonos server process
     const openNetworkFiles = execSync(`lsof -i -n -P`).toString();
-    const serverRunning = openNetworkFiles.match(/:5005\b/);
+    const serverRunning = !!openNetworkFiles.match(/:5005\b/);
     return serverRunning;
+  },
+
+  zonesDetected() {
+    // TODO: check for succesful zones request to determine if they've been discovered
+    // this will be used to poll during startSonosServer
   },
 
   wipStartSonosServer: async function() {

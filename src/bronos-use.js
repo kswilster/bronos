@@ -1,6 +1,5 @@
 require('babel-polyfill');
 import _ from 'underscore';
-import request from 'request';
 import najax from 'najax';
 import Utils from './utils';
 import program from 'commander';
