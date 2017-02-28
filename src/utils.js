@@ -20,15 +20,25 @@ const SONOS_SERVER_PORT = '5005';
 
 const Utils = {
 
+  _config: null,
+
+  get config() {
+    this._config = this._config || new Preferences('com.lintcondition.bronos', {});
+    return this._config;
+  },
+
   getCurrentZone: async function() {
     await this.startSonosServer();
-    const config = await this.readConfig();
-    const zone = await this.getZone(config.zone.roomName);
 
-    if (zone) {
-      return zone;
+    if (this.config.zone) {
+      const zone = await this.getZone(this.config.zone.roomName);
+      if (zone) {
+        return zone;
+      } else {
+        return Promise.reject('No zones found');
+      }
     } else {
-      console.log('No zones found');
+      return Promise.reject('No zone selected');
     }
   },
 
@@ -38,22 +48,6 @@ const Utils = {
         resolve();
       }, timeout);
     });
-  },
-
-  readConfig: async function() {
-    const promise = new Promise((resolve, reject) => {
-      fs.readFile(`${os.homedir()}/.bronos`, (err, data) => {
-        if (err) reject(err);
-
-        if (data && data.length) {
-          resolve(JSON.parse(data));
-        } else {
-          reject();
-        }
-      });
-    });
-
-    return promise;
   },
 
   getZones: async function() {
@@ -73,6 +67,7 @@ const Utils = {
     }
   },
 
+  // TODO: use zones/:zoneName/state
   getZone: async function(zoneName) {
     const zones = await this.getZones();
     return zones.find((zone) => { return zone.roomName === zoneName });
@@ -134,7 +129,6 @@ const Utils = {
         process.exit();
       }
     }
-    console.log('sonos server started');
   },
 
   isSonosServerRunning() {

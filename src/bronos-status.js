@@ -55,9 +55,15 @@ const app = {
         volume: 65
       }
     };
+    var zone;
 
     const testing = false;
-    const zone = testing ? fakeZone : await Utils.getCurrentZone();
+    try {
+      zone = testing ? fakeZone : await Utils.getCurrentZone();
+    } catch (e) {
+      console.error(e);
+      process.exit();
+    }
 
     const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
     const artist = zone.state.currentTrack.artist;

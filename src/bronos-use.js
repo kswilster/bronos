@@ -43,14 +43,7 @@ const app = {
     }
     const zone = await this.chooseZone(zones);
 
-    var config;
-    try {
-      config = await this.readConfig();
-    } catch (e) {
-      config = {};
-    }
-
-    await this.writeConfig({ ...config, zone });
+    Utils.config.zone = zone;
     console.log(`Switched to zone: ${zone.roomName}`);
     process.exit(1);
   },
@@ -89,33 +82,6 @@ const app = {
     const index = result.split(':')[0];
     const zone = zones[index];
     return zone;
-  },
-
-  readConfig: async function() {
-    const promise = new Promise((resolve, reject) => {
-      fs.readFile(`${os.homedir()}/.bronos`, (err, data) => {
-        if (err) reject(err);
-
-        if (data && data.length) {
-          resolve(JSON.parse(data));
-        } else {
-          reject();
-        }
-      });
-    });
-
-    return promise;
-  },
-
-  writeConfig: async function(data) {
-    const promise = new Promise(function(resolve, reject) {
-      fs.writeFile(`${os.homedir()}/.bronos`, JSON.stringify(data), (err) => {
-        if (err) handleError(err);
-        resolve();
-      });
-    });
-
-    return promise;
   }
 };
 
