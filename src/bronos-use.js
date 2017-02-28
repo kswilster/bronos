@@ -119,10 +119,6 @@ const app = {
   }
 };
 
-program.action(function() {
-  app.run();
-});
-
 // completely custom help
 if( process.argv.indexOf( '-h' ) !== -1 || process.argv.indexOf( '--help' ) !== -1 ) {
 	const position = process.argv.indexOf( '-h' ) !== -1 ? process.argv.indexOf( '-h' ) : process.argv.indexOf( '--help' );
@@ -136,6 +132,4 @@ if( process.argv.indexOf( '-h' ) !== -1 || process.argv.indexOf( '--help' ) !== 
 }
 
 program.parse(process.argv);
-
-
 app.run();
