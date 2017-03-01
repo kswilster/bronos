@@ -1,176 +1,85 @@
 require('babel-polyfill');
-
-var SpotifyWebApi = require('spotify-web-api-node');
-var Sonos = require('sonos');
-var program = require('commander');
-
 import Utils from './utils';
+import chalk from 'chalk';
 
-const spotifyApi = new SpotifyWebApi();
+const HORIZONTAL_RULE = '---------------------------------------------------------';
 
-process.on('uncaughtException', (err) => {
-  fs.writeSync(1, `Caught exception: ${err}`);
-});
+// TODO: what to do if queue is not in use?
+// NOTE: queue in use is indicated by zone.state.currentTrack.type === 'track'
+const run = async function() {
+  const currentZone = await Utils.getCurrentZone();
+  const queue = await Utils.getQueue(currentZone.roomName);
+  const trackNo = parseInt(currentZone.state.trackNo);
+  // show 9 tracks on either side of the current track
+  const minTrack = trackNo - 9;
+  const maxTrack = trackNo + 9;
+  const queueInUse = currentZone.state.currentTrack.type === 'track';
+  const queueInUseText = queueInUse ? 'QUEUE' : 'QUEUE (Not in use)';
 
-const app = {
-  run: async function(query, { type='track' }) {
-    await Utils.startSonosServer();
+  // highlight current track if queue is in use
+  const highlight = queueInUse ? chalk.bold.cyan : (text) => text;
 
-    if (type === 'artist') {
-      this.searchByArtist(query);
-    } else if (type === 'album') {
-      this.searchByAlbum(query);
-    } else {
-      this.searchByTrack(query);
-    }
-  },
+  console.log(getStatusFromZone(currentZone));
+  console.log();
+  console.log(queueInUseText);
 
-  _queueTracks: async function(trackIds) {
-    const zone = await Utils.getCurrentZone();
-    const zoneName = zone.roomName;
-
-    trackIds.forEach(async function(trackId) {
-      await Utils.queueTrack(zoneName, trackId);
-    });
-  },
-
-  searchByArtist: async function(query) {
-    const artists = await this.findArtists(query);
-    const artistId = await this.chooseArtist(artists);
-    const albums = await this.getArtistAlbums(artistId);
-    const albumId = await this.chooseAlbum(albums, { includeTopTracks: true });
-
-    var tracks;
-    if (albumId === 'TOP_TRACKS') {
-      tracks = await this.getArtistTopTracks(artistId);
-    } else {
-      tracks = await this.getAlbumTracks(albumId);
-    }
-
-    const trackIds = await this.chooseTracks(tracks);
-    this._queueTracks(trackIds);
-  },
-
-  searchByAlbum: async function(query) {
-    const albums = await this.findAlbums(query);
-    const albumId = await this.chooseAlbum(albums);
-    const tracks = await this.getAlbumTracks(albumId);
-    const trackIds = await this.chooseTracks(tracks);
-    this._queueTracks(trackIds);
-  },
-
-  searchByTrack: async function(query) {
-    const tracks = await this.findTracks(query);
-    const trackIds = await this.chooseTracks(tracks);
-    this._queueTracks(trackIds);
-  },
-
-  chooseArtist: async function(artists) {
-    var fzfInput = '';
-
-    artists.forEach(function(artist, index) {
-      fzfInput += `${index}: ${artist.name}\n`;
-    })
-
-    const result = await Utils.startFzf(fzfInput);
-    const index = result.split(':')[0];
-    const artist = artists[index];
-    return artist.id;
-  },
-
-  chooseAlbum: async function(albums, {includeTopTracks=false}={}) {
-    var fzfInput = '';
-
-    if (includeTopTracks) {
-      albums.unshift({
-        id: 'TOP_TRACKS',
-        name: 'Top Tracks'
-      });
-    }
-
-    albums.forEach(function(album, index) {
-      fzfInput += `${index}: ${album.name}\n`;
-    })
-
-    const result = await Utils.startFzf(fzfInput);
-    const index = result.split(':')[0];
-    const album = albums[index];
-    return album.id;
-  },
-
-  chooseTracks: async function(tracks) {
-    var fzfInput = "";
-
-    tracks.forEach(function(track, index) {
-      fzfInput += `${index}: ${track.artists[0].name}\t\t${track.name}\n`;
-    });
-
-    const result = await Utils.startFzf(fzfInput, true);
-    const lines = result.split('\n');
-    lines.shift();
-    const chosenTrackIds = [];
-
-    for (const line in lines) {
-      const index = line.split(':')[0];
-      const track = tracks[index];
-      chosenTrackIds.push(track.id);
-    }
-    return chosenTrackIds;
-  },
-
-  /**
-   * lower level spotifyApi wrappers
-   */
-   findArtists: async function(query) {
-     const { body: { artists: { items } } } = await spotifyApi.search(query, ['artist'], {
-       limit: 50
-     });
-     return items;
-   },
-
-   findAlbums: async function(query) {
-     const { body: { albums: { items } } } = await spotifyApi.search(query, ['album'], {
-       limit: 50
-     });
-     return items;
-   },
-
-  findTracks: async function(query) {
-    const { body: { tracks: { items } } } = await spotifyApi.search(query, ['track'], {
-      limit: 50
-    });
-    return items;
-  },
-
-  getArtistAlbums: async function(artistId) {
-    const { body: { items } } = await spotifyApi.getArtistAlbums(artistId);
-    return items;
-  },
-
-  getArtistTopTracks: async function(artistId) {
-    const { body: { tracks } } = await spotifyApi.getArtistTopTracks(artistId, 'US');
-    return tracks;
-  },
-
-  getAlbumTracks: async function(albumId) {
-    const { body: { items } } = await spotifyApi.getAlbumTracks(albumId);
-    return items;
+  if (trackNo === 1) {
+    console.log(highlight(HORIZONTAL_RULE));
+  } else {
+    console.log(HORIZONTAL_RULE);
   }
-}
 
-var queryValue;
+  queue.forEach(function(track, index) {
+    // sonos is 1-indexed
+    index++;
+    if (index < minTrack || index > maxTrack) {
+      return;
+    }
 
-program
-  .arguments('<query...>')
-  .option('-i, --index [<index>]', 'queue insertion index')
-  .option('-t, --type [<type>]', 'type of entity to search for (artist | album | track). Defaults to track')
-  .action(function(query, options) {
-    queryValue = query;
-    app.run(query.join(' '), options);
-  })
-  .parse(process.argv);
+    if (index === trackNo) {
+      console.log(highlight(track.title));
+      console.log(highlight(track.artist));
+      console.log(highlight(HORIZONTAL_RULE));
+    } else {
+      console.log(track.title);
+      console.log(track.artist);
 
-  if (typeof queryValue === 'undefined') {
-     console.error('no query given!');
-     process.exit(1);
+      if (index + 1 === trackNo) {
+        console.log(highlight(HORIZONTAL_RULE));
+      } else {
+        console.log(HORIZONTAL_RULE);
+      }
+    }
+  });
+};
+
+function getStatusFromZone(zone) {
+  const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
+  const artist = zone.state.currentTrack.artist;
+  const album = zone.state.currentTrack.album;
+  const track = zone.state.currentTrack.title;
+  const shuffleState = zone.state.playMode.shuffle ? 'ON' : 'OFF';
+  const crossfadeState = zone.state.playMode.crossfade ? 'ON' : 'OFF';
+  const repeatState = zone.state.playMode.repeat ? 'ON' : 'OFF';
+
+  const playbackStateText = `${playbackStateIcon} ${track} - ${artist}`;
+  const volumeText = `Volume: ${zone.state.volume}`;
+  const shuffleText = `Shuffle: ${shuffleState}`;
+  const crossfadeText = `Crossfade: ${crossfadeState}`;
+  const repeatText = `Repeat: ${repeatState}`;
+
+  const statusArray = [];
+  statusArray.push(zone.roomName);
+  if (track && track.length) {
+    statusArray.push(`    ${playbackStateText}`);
+  } else {
+    statusArray.push('    No song playing');
   }
+  statusArray.push(`    ${volumeText}`);
+  statusArray.push(`    ${shuffleText}`);
+  statusArray.push(`    ${repeatText}`);
+  statusArray.push(`    ${crossfadeText}`);
+  return statusArray.join('\n');
+};
+
+run();

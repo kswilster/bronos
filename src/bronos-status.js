@@ -38,6 +38,9 @@ function sleep(timeout) {
 // NOTE: crossFade: true/false
 const app = {
   run: async function() {
+    const showAlbumArt = false;
+    const testing = false;
+
     const fakeZone = {
       roomName: 'Living Room',
       state: {
@@ -55,9 +58,8 @@ const app = {
         volume: 65
       }
     };
-    var zone;
 
-    const testing = false;
+    var zone;
     try {
       zone = testing ? fakeZone : await Utils.getCurrentZone();
     } catch (e) {
@@ -92,7 +94,7 @@ const app = {
     statusArray.push(`    ${crossfadeText}`);
 
     // TODO: handle album art failure better
-    if (album && album.length) {
+    if (album && album.length && showAlbumArt) {
       try {
         const albumArtUrl = await this.getAlbumArtURL(artist, album);
         // const albumArtUrl = 'http://content.whas11.com/photo/2016/09/09/red_river_gorge_1473447099143_5985427_ver1.0.jpg';

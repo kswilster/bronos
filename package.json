@@ -26,6 +26,7 @@
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-stage-2": "^6.13.0",
     "better-stack-traces": "^1.1.0",
+    "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "image-to-ascii": "^3.0.3",
     "najax": "^0.7.1",

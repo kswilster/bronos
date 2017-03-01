@@ -18,11 +18,11 @@ program
   .command('use', 'select a device or group');
 
 // TODO: find command more reliably
-const commandName = process.argv[2];
-const allCommands = program.commands.map((command) => command._name);
-if (!allCommands.includes(commandName)) {
-  console.error(`bronos: '${commandName}' is not a bronos command. See 'bronos --help'.`)
-  process.exit();
-}
+// const commandName = process.argv[2];
+// const allCommands = program.commands.map((command) => command._name);
+// if (!allCommands.includes(commandName)) {
+//   console.error(`bronos: '${commandName}' is not a bronos command. See 'bronos --help'.`)
+//   process.exit();
+// }
 
 program.parse(process.argv);

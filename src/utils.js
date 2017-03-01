@@ -121,6 +121,16 @@ const Utils = {
     return axios.get(url);
   },
 
+  playTrack: function(zoneName, trackId) {
+    const url = `http://localhost:5005/${zoneName}/spotify/now/spotify:track:${trackId}`;
+    return axios.get(url);
+  },
+
+  playTrackNext: function(zoneName, trackId) {
+    const url = `http://localhost:5005/${zoneName}/spotify/next/spotify:track:${trackId}`;
+    return axios.get(url);
+  },
+
   queueTrack: async function(zoneName, trackId, index) {
     // Sonos API is indexed at 1, that's no fun
     index++;
@@ -159,6 +169,18 @@ const Utils = {
         process.exit();
       }
     }
+  },
+
+  // select the queue for use (as opposed to a playlist, line-in, or nothing)
+  selectQueue: async function({ roomName, uuid }) {
+    // TODO: how can we determine if a queue has been selected so we don't do this all the time?
+    // NOTE: this is a pretty harmless, seemingly idempotent action
+    if (!uuid || !roomName) {
+      console.error('no zone provided!');
+      return
+    }
+    const url = encodeURI(`http://localhost:5005/${roomName}/setavtransporturi/x-rincon-queue:${uuid}#0`);
+    return axios.get(url);
   },
 
   isSonosServerRunning() {

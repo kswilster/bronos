@@ -13,12 +13,14 @@ process.on('uncaughtException', (err) => {
 });
 
 const app = {
-  run: async function(query, { type='track', index=-1 }) {
+  run: async function(query, { type='track', index=-1, play, next }) {
     // TODO: better error handling
     try {
       this.validateArgs(...arguments);
       await Utils.startSonosServer();
       const zone = await Utils.getCurrentZone();
+      Utils.selectQueue(zone);
+
       const zoneName = zone.roomName;
       var trackIds = [];
 
@@ -31,8 +33,17 @@ const app = {
       }
 
       const queue = await Utils.getQueue(zoneName);
-      this._queueTracks(zoneName, trackIds, index, queue.length);
+
+      // TODO: implement multi-track playTrack and playTrackNext
+      if (play) {
+        Utils.playTrack(zoneName, trackIds[0]);
+      } else if (next) {
+        Utils.playTrackNext(zoneName, trackIds[0]);
+      } else {
+        this._queueTrack(zoneName, trackIds[0], index, queue.length);
+      }
     } catch (e) {
+      console.error('Error in bronos-add#run');
       console.error(e.stack);
     }
   },
@@ -54,11 +65,22 @@ const app = {
     }
   },
 
+  _queueTrack: async function(zoneName, trackId, index=-1, queueLength) {
+    if (index === -1) {
+      index = queueLength;
+    }
+
+    Utils.queueTrack(zoneName, trackId, index);
+  },
+
   _queueTracks: async function(zoneName, trackIds, index=-1, queueLength) {
     if (index === -1) {
       index = queueLength;
     }
 
+    // TODO: implement addMultipleURIsToQueue and stop sending all these requests
+    // to queue multiple songs
+    // NOTE: avoid using _queueTracks for now because this is awful
     trackIds.forEach(async function(trackId) {
       console.log(`queueTracks ${zoneName} ${trackIds} ${index} ${queueLength}`);
       await Utils.queueTrack(zoneName, trackId, index);
@@ -130,20 +152,23 @@ const app = {
   chooseTracks: async function(tracks) {
     var fzfInput = "";
 
-    tracks.forEach(function(track, index) {
-      fzfInput += `${index}: ${track.artists[0].name}\t\t${track.name}\n`;
+    tracks.forEach(function(track, trackIndex) {
+      fzfInput += `${trackIndex}: ${track.artists[0].name}\t\t${track.name}\n`;
     });
 
     const result = await Utils.startFzf(fzfInput, true);
     const lines = result.split('\n');
-    lines.shift();
+    lines.pop();
+
     const chosenTrackIds = [];
 
-    for (const line in lines) {
-      const index = line.split(':')[0];
+    for (const line of lines) {
+      const index = parseInt(line.split(':')[0]);
       const track = tracks[index];
+
       chosenTrackIds.push(track.id);
     }
+
     return chosenTrackIds;
   },
 
