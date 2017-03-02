@@ -1,7 +1,7 @@
 require('babel-polyfill');
 import _ from 'underscore';
 import Utils from './utils';
-import najax from 'najax';
+import axios from 'axios';
 
 var os = require('os');
 var fs = require('fs');
@@ -38,7 +38,7 @@ function sleep(timeout) {
 // NOTE: crossFade: true/false
 const app = {
   run: async function() {
-    const showAlbumArt = false;
+    const showAlbumArt = true;
     const testing = false;
 
     const fakeZone = {
@@ -116,12 +116,7 @@ const app = {
   },
 
   spotifyRequest: async function(url) {
-    const promise = new Promise((resolve, reject) => {
-      najax.get(url, function(response) {
-        resolve(JSON.parse(response));
-      });
-    });
-    return promise;
+    return axios.get(url).then(({ data }) => data);
   },
 
   createAlbumArtMatrix: async function(imgUrl, textArray) {

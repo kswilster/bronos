@@ -1,6 +1,5 @@
 require('babel-polyfill');
 import _ from 'underscore';
-import najax from 'najax';
 import Utils from './utils';
 import program from 'commander';
 
@@ -45,30 +44,6 @@ const app = {
     Utils.config.zone = zone;
     console.log(`Switched to zone: ${zone.roomName}`);
     process.exit(1);
-  },
-
-  getZones: async function() {
-    const promise = new Promise(function(resolve, reject) {
-      const timeout = setTimeout(() => {
-        reject('No Sonos devices found');
-      }, 5000);
-
-      najax.get('http://localhost:5005/zones')
-        .success(function(response) {
-          clearTimeout(timeout);
-          const parsedResponse = JSON.parse(response);
-          var zones = [];
-          for (const entry of parsedResponse) {
-            zones.push(entry.members[0]);
-          }
-          resolve(zones);
-        })
-        .error(function(error) {
-          reject(error);
-        });
-    });
-
-    return promise;
   },
 
   chooseZone: async function(zones) {

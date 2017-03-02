@@ -1,6 +1,4 @@
 require('babel-polyfill');
-
-import najax from 'najax';
 import axios from 'axios';
 
 var path = require('path');
