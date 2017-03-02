@@ -37,7 +37,7 @@ function sleep(timeout) {
 // NOTE: crossFade: true/false
 const app = {
   run: async function() {
-    const showAlbumArt = true;
+    const showAlbumArt = false;
     const testing = false;
 
     const fakeZone = {

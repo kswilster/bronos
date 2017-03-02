@@ -12,15 +12,4 @@ You will need the following things properly installed on your computer.
 
 ## Installation
 
-* `git clone <repository-url>`
-* `cd bronos`
-* `npm install`
-
-## Building / Running
-
-* `npm run watch`
-* `node dist/bronos.js`
-
-### Running Tests
-
-* Just Kidding!
+npm install bronos
