@@ -30,7 +30,6 @@
     "commander": "^2.9.0",
     "image-to-ascii": "^3.0.3",
     "preferences": "^0.2.1",
-    "sonos": "^0.12.1",
     "sonos-http-api": "https://github.com/jishi/node-sonos-http-api/archive/master.tar.gz",
     "spotify-web-api-node": "^2.3.5",
     "underscore": "^1.8.3",

@@ -1,7 +1,6 @@
 require('babel-polyfill');
 
 var SpotifyWebApi = require('spotify-web-api-node');
-var Sonos = require('sonos');
 var program = require('commander');
 
 import Utils from './utils';

@@ -5,7 +5,6 @@ import axios from 'axios';
 
 var os = require('os');
 var fs = require('fs');
-var sonos = require('sonos');
 var SpotifyWebApi = require('spotify-web-api-node');
 var imageToAscii = require("image-to-ascii");
 var stringify = require("asciify-pixel-matrix");

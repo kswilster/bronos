@@ -6,7 +6,6 @@ import program from 'commander';
 var os = require('os');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
-var sonos = require('sonos');
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
