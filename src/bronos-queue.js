@@ -2,7 +2,8 @@ require('babel-polyfill');
 import Utils from './utils';
 import chalk from 'chalk';
 
-const HORIZONTAL_RULE = '---------------------------------------------------------';
+const TERMINAL_WIDTH = process.stdout.columns;
+const HORIZONTAL_RULE = '-'.repeat(TERMINAL_WIDTH);
 
 // TODO: what to do if queue is not in use?
 // NOTE: queue in use is indicated by zone.state.currentTrack.type === 'track'
@@ -37,11 +38,11 @@ const run = async function() {
     }
 
     if (index === trackNo) {
-      console.log(highlight(track.title));
+      console.log(highlight(floatText(track.title, index)));
       console.log(highlight(track.artist));
       console.log(highlight(HORIZONTAL_RULE));
     } else {
-      console.log(track.title);
+      console.log(floatText(track.title, index));
       console.log(track.artist);
 
       if (index + 1 === trackNo) {
@@ -51,6 +52,13 @@ const run = async function() {
       }
     }
   });
+};
+
+function floatText(left, right) {
+  const leftWidth = `${left}`.length;
+  const rightWidth = `${right}`.length;
+  const numSpaces = Math.max(TERMINAL_WIDTH - leftWidth - rightWidth, 0) ;
+  return `${left}${' '.repeat(numSpaces)}${right}`;
 };
 
 function getStatusFromZone(zone) {

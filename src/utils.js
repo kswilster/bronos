@@ -96,6 +96,16 @@ const Utils = {
     return response.data;
   },
 
+  next: async function(zoneName) {
+    const url = encodeURI(`http://localhost:5005/${zoneName}/next`);
+    return axios.get(url);
+  },
+
+  previous: async function(zoneName) {
+    const url = encodeURI(`http://localhost:5005/${zoneName}/previous`);
+    return axios.get(url);
+  },
+
   play: async function(zoneName) {
     const url = encodeURI(`http://localhost:5005/${zoneName}/play`);
     return axios.get(url);

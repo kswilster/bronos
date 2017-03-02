@@ -1,9 +1,10 @@
 require('babel-polyfill');
+var program = require('commander');
 import Utils from './utils';
 
 function run() {
   const currentZone = Utils.config.zone;
-  Utils.next(currentZone.roomName);
+  Utils.previous(currentZone.roomName);
 }
 
 run();

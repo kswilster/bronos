@@ -1,11 +1,7 @@
 require('babel-polyfill');
-
-var SpotifyWebApi = require('spotify-web-api-node');
 var program = require('commander');
 
 import Utils from './utils';
-
-const spotifyApi = new SpotifyWebApi();
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);

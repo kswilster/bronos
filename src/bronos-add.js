@@ -215,7 +215,6 @@ var queryValue;
 
 program
   .arguments('<query...>')
-  // TODO: implement -p and -n
   .option('-p, --play', 'queue the song(s) after the song playing and start playing immediately')
   .option('-n, --next', 'queue the song(s) after the song playing')
   .option('-i, --index [<index>]', 'queue insertion index. (default: 0) (-1 for last position)')
