@@ -1,59 +1,51 @@
-import Backbone from 'backbone';
 import assert from 'assert';
 import axios from 'axios';
 
-// TODO: set this up somewhere else
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-const { window } = new JSDOM(`...`);
-const $ = require("jquery")(window);
-Backbone.$ = $;
+import emberMetal from 'ember-metal';
+import emberRuntime from 'ember-runtime';
 
-export default Backbone.Model.extend({
-
-  idAttribute: 'roomName',
-
+export default Ember.Object.extend({
   // base url for most actions
-  urlRoot() {
+  baseURL: function() {
     const roomName = this.get('roomName');
-    return `http://localhost:5005/${roomName}`;
-  },
+    return `http://localhost:5005/${roomName}/`;
+  }.property('roomName'),
 
-  // url just for fetch
-  url() {
+  // TODO: override axios url to encodeURI
+  axios: function() {
+    const baseURL = this.get('baseURL');
+    const axiosInstance = axios.create({ baseURL });
+    return axiosInstance;
+  }.property('baseURL'),
+
+  // lifecycle hooks
+  init() {
     const roomName = this.get('roomName');
-    return `http://localhost:5005/zones/${roomName}/status`;
-  },
-
-  initialize({ roomName }) {
     // Zones require a roomName
     assert.ok(typeof roomName === 'string', 'Zone requires a roomName');
-    this.axios = axios.create({
-      baseURL: this.urlRoot(),
-    });
-
-    // TODO: less bad override
-    this.axios._get = this.axios.get;
-    this.axios.get = (url, ...rest) => {
-      this._get(encodeURI(url), ...rest);
-    }
   },
 
   // getter actions
+  fetch: async function() {
+    const roomName = this.get('roomName');
+    const url = `http://localhost:5005/${roomName}/state`;
+    const response = await axios.get(url);
+    this.set('state', response.data);
+  },
+
   getQueue: async function() {
-    const response = await this.axios.get('/queue');
+    const axios = this.get('axios');
+    const response = await axios.get('/queue');
     return response.data;
   },
 
   // setter actions
   playTrack(trackId) {
-    return this.axios.get(`/spotify/now/spotify:track:${trackId}`);
+    return this.get('axios').get(`/spotify/now/spotify:track:${trackId}`);
   },
 
   playTrackNext(trackId) {
-    const baseUrl = this.get('url');
-    const url = `${baseUrl}/spotify/next/spotify:track:${trackId}`;
-    return axios.get(url);
+    return this.get('axios').get(`/spotify/next/spotify:track:${trackId}`);
   },
 
   queueTrack: async function(zoneName, trackId, index) {
@@ -63,9 +55,9 @@ export default Backbone.Model.extend({
     // TODO: use axios transformResponse config to transform this response
     const promise = new Promise(function(resolve, reject) {
 
-      const baseUrl = `http://localhost:5005/${zoneName}/spotify/queue/spotify:track:${trackId}`;
+      const baseURL = `http://localhost:5005/${zoneName}/spotify/queue/spotify:track:${trackId}`;
       const indexParam = index ? `/${index}` : '';
-      const url = encodeURI(`${baseUrl}${indexParam}`);
+      const url = encodeURI(`${baseURL}${indexParam}`);
 
       axios.get(url, function() {
         resolve();
