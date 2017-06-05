@@ -1,8 +1,13 @@
+require('babel-polyfill');
+
 import assert from 'assert';
 import axios from 'axios';
-
 import emberMetal from 'ember-metal';
 import emberRuntime from 'ember-runtime';
+import Utils from '../utils';
+import path from 'path';
+
+const { fork } = require('child_process');
 
 export default Ember.Object.extend({
   // base url for most actions
@@ -48,6 +53,45 @@ export default Ember.Object.extend({
     return this.get('axios').get(`/spotify/next/spotify:track:${trackId}`);
   },
 
+  next() {
+    const axios = this.get('axios');
+    const roomName = this.get('roomName');
+    const url = encodeURI(`http://localhost:5005/${roomName}/next`);
+    return axios.get(url);
+  },
+
+  previous: async function() {
+    const axios = this.get('axios');
+    const roomName = this.get('roomName');
+    const url = encodeURI(`http://localhost:5005/${roomName}/previous`);
+    return axios.get(url);
+  },
+
+  play: async function() {
+    const axios = this.get('axios');
+    const roomName = this.get('roomName');
+    const url = encodeURI(`http://localhost:5005/${roomName}/play`);
+    return axios.get(url);
+  },
+
+  pause: async function() {
+    const axios = this.get('axios');
+    const roomName = this.get('roomName');
+    const url = encodeURI(`http://localhost:5005/${roomName}/pause`);
+    return axios.get(url);
+  },
+
+  say: async function(message) {
+    const axios = this.get('axios');
+    const roomName = this.get('roomName');
+    const url = encodeURI(`http://localhost:5005/${roomName}/say/${message}`);
+    this.backgroundMethod('axiosGet', url);
+  },
+
+  axiosGet(url) {
+    return this.get('axios').get(url);
+  },
+
   queueTrack: async function(zoneName, trackId, index) {
     // Sonos API is indexed at 1, that's no fun
     index++;
@@ -65,5 +109,21 @@ export default Ember.Object.extend({
     });
 
     return promise;
+  },
+
+  // TODO: extract this into base model
+  backgroundMethod(methodName, ...args) {
+    const modelName = 'zone';
+    const scriptPath = path.normalize(`${__dirname}/background.js`);
+    const child = fork(scriptPath);
+    const data = this.serialize();
+
+    child.send({ modelName, methodName, args, data });
+    child.disconnect();
+    process.exit();
+  },
+
+  serialize() {
+    return this.getProperties('roomName', 'state');
   },
 });
