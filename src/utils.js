@@ -14,7 +14,6 @@ process.on('uncaughtException', (err) => {
 });
 
 const APP_ID = 'com.lintcondition.bronos';
-const SPOTIFY_ACCESS_TOKEN_URL = 'https://oka1hz3dtb.execute-api.us-east-1.amazonaws.com/prod/spotifyAccessToken';
 const SONOS_SERVER_PORT = '5005';
 
 const Utils = {
@@ -82,15 +81,6 @@ const Utils = {
       return zones;
     } catch (error) {
       this.handleAxiosError(error);
-    }
-  },
-
-  getSpotifyAccessToken: async function() {
-    try {
-      const response = await axios.get(SPOTIFY_ACCESS_TOKEN_URL);
-      return response.data.body['access_token'];
-    } catch (e) {
-      console.log(e.stack);
     }
   },
 

@@ -1,9 +1,9 @@
 require('babel-polyfill');
 
-var SpotifyWebApi = require('spotify-web-api-node');
 var program = require('commander');
 
 import Utils from './utils';
+import SpotifyApi from './models/spotify-api';
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
@@ -17,7 +17,8 @@ const app = {
     var zone, zoneName, trackIds;
 
     try {
-      this.spotifyApi = await this.getSpotifyApi();
+      this.spotifyApi = SpotifyApi.create();
+      await this.spotifyApi.authenticate();
 
       this.validateArgs(...arguments);
       await Utils.startSonosServer();
@@ -98,30 +99,30 @@ const app = {
   },
 
   searchByArtist: async function(query) {
-    const artists = await this.findArtists(query);
+    const artists = await this.spotifyApi.findArtists(query);
     const artistId = await this.chooseArtist(artists);
-    const albums = await this.getArtistAlbums(artistId);
+    const albums = await this.spotifyApi.getArtistAlbums(artistId);
     const albumId = await this.chooseAlbum(albums, { includeTopTracks: true });
 
     var tracks;
     if (albumId === 'TOP_TRACKS') {
-      tracks = await this.getArtistTopTracks(artistId);
+      tracks = await this.spotifyApi.getArtistTopTracks(artistId);
     } else {
-      tracks = await this.getAlbumTracks(albumId);
+      tracks = await this.spotifyApi.getAlbumTracks(albumId);
     }
 
     return await this.chooseTracks(tracks);
   },
 
   searchByAlbum: async function(query) {
-    const albums = await this.findAlbums(query);
+    const albums = await this.spotifyApi.findAlbums(query);
     const albumId = await this.chooseAlbum(albums);
-    const tracks = await this.getAlbumTracks(albumId);
+    const tracks = await this.spotifyApi.getAlbumTracks(albumId);
     return await this.chooseTracks(tracks);
   },
 
   searchByTrack: async function(query) {
-    const tracks = await this.findTracks(query);
+    const tracks = await this.spotifyApi.findTracks(query);
     return await this.chooseTracks(tracks);
   },
 
@@ -180,45 +181,6 @@ const app = {
 
     return chosenTrackIds;
   },
-
-  /**
-   * lower level spotifyApi wrappers
-   */
-   findArtists: async function(query) {
-     const { body: { artists: { items } } } = await this.spotifyApi.search(query, ['artist'], {
-       limit: 50
-     });
-     return items;
-   },
-
-   findAlbums: async function(query) {
-     const { body: { albums: { items } } } = await this.spotifyApi.search(query, ['album'], {
-       limit: 50
-     });
-     return items;
-   },
-
-  findTracks: async function(query) {
-    const { body: { tracks: { items } } } = await this.spotifyApi.search(query, ['track'], {
-      limit: 50
-    });
-    return items;
-  },
-
-  getArtistAlbums: async function(artistId) {
-    const { body: { items } } = await this.spotifyApi.getArtistAlbums(artistId);
-    return items;
-  },
-
-  getArtistTopTracks: async function(artistId) {
-    const { body: { tracks } } = await this.spotifyApi.getArtistTopTracks(artistId, 'US');
-    return tracks;
-  },
-
-  getAlbumTracks: async function(albumId) {
-    const { body: { items } } = await this.spotifyApi.getAlbumTracks(albumId);
-    return items;
-  }
 }
 
 var queryValue;
