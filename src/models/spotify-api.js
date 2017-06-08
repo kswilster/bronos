@@ -18,7 +18,8 @@ export default Ember.Object.extend({
   },
 
   async authenticate() {
-    const accessToken = this._getCachedToken() || await this._fetchTokenAndCache();
+    const accessToken = await this._fetchTokenAndCache();
+    this.set('accessToken', accessToken);
     this.set('_api', new SpotifyWebApi({ accessToken }));
   },
 
@@ -72,10 +73,10 @@ export default Ember.Object.extend({
   }.property(),
 
   async _fetchTokenAndCache() {
+    const spotifyAccessTokenUrl = this.get('spotifyAccessTokenUrl');
     const response = await axios.get(spotifyAccessTokenUrl);
     const token = response.data.body['access_token'];
     const expiresIn = response.data.body['expires_in'];
-
 
     this._cacheToken(token, expiresIn);
     return token;
