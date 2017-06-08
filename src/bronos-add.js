@@ -1,27 +1,31 @@
 require('babel-polyfill');
 
-var SpotifyWebApi = require('spotify-web-api-node');
 var program = require('commander');
 
 import Utils from './utils';
-
-const spotifyApi = new SpotifyWebApi();
+import SpotifyApi from './models/spotify-api';
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
 });
 
 const app = {
+  spotifyApi: null,
+
   run: async function(query, { type='track', index=-1, play, next }) {
     // TODO: better error handling
+    var zone, zoneName, trackIds;
+
     try {
+      this.spotifyApi = SpotifyApi.create();
+      await this.spotifyApi.authenticate();
+
       this.validateArgs(...arguments);
       await Utils.startSonosServer();
-      const zone = await Utils.getCurrentZone();
+      zone = await Utils.getCurrentZone();
       Utils.selectQueue(zone);
 
-      const zoneName = zone.roomName;
-      var trackIds = [];
+      zoneName = zone.roomName;
 
       if (type === 'artist') {
         trackIds = await this.searchByArtist(query);
@@ -42,9 +46,16 @@ const app = {
         this._queueTrack(zoneName, trackIds[0], index, queue.length);
       }
     } catch (e) {
-      console.error('Error in bronos-add#run');
-      console.error(e.stack);
+      console.log(e.stack);
     }
+  },
+
+  getSpotifyApi: async function() {
+    const accessToken = await Utils.getSpotifyAccessToken();
+    const spotifyApi = new SpotifyWebApi({ accessToken });
+
+    // spotifyApi.setAccessToken(spotifyApi);
+    return spotifyApi;
   },
 
   validateArgs(query, { type='track', index=0 }) {
@@ -88,30 +99,30 @@ const app = {
   },
 
   searchByArtist: async function(query) {
-    const artists = await this.findArtists(query);
+    const artists = await this.spotifyApi.findArtists(query);
     const artistId = await this.chooseArtist(artists);
-    const albums = await this.getArtistAlbums(artistId);
+    const albums = await this.spotifyApi.getArtistAlbums(artistId);
     const albumId = await this.chooseAlbum(albums, { includeTopTracks: true });
 
     var tracks;
     if (albumId === 'TOP_TRACKS') {
-      tracks = await this.getArtistTopTracks(artistId);
+      tracks = await this.spotifyApi.getArtistTopTracks(artistId);
     } else {
-      tracks = await this.getAlbumTracks(albumId);
+      tracks = await this.spotifyApi.getAlbumTracks(albumId);
     }
 
     return await this.chooseTracks(tracks);
   },
 
   searchByAlbum: async function(query) {
-    const albums = await this.findAlbums(query);
+    const albums = await this.spotifyApi.findAlbums(query);
     const albumId = await this.chooseAlbum(albums);
-    const tracks = await this.getAlbumTracks(albumId);
+    const tracks = await this.spotifyApi.getAlbumTracks(albumId);
     return await this.chooseTracks(tracks);
   },
 
   searchByTrack: async function(query) {
-    const tracks = await this.findTracks(query);
+    const tracks = await this.spotifyApi.findTracks(query);
     return await this.chooseTracks(tracks);
   },
 
@@ -170,45 +181,6 @@ const app = {
 
     return chosenTrackIds;
   },
-
-  /**
-   * lower level spotifyApi wrappers
-   */
-   findArtists: async function(query) {
-     const { body: { artists: { items } } } = await spotifyApi.search(query, ['artist'], {
-       limit: 50
-     });
-     return items;
-   },
-
-   findAlbums: async function(query) {
-     const { body: { albums: { items } } } = await spotifyApi.search(query, ['album'], {
-       limit: 50
-     });
-     return items;
-   },
-
-  findTracks: async function(query) {
-    const { body: { tracks: { items } } } = await spotifyApi.search(query, ['track'], {
-      limit: 50
-    });
-    return items;
-  },
-
-  getArtistAlbums: async function(artistId) {
-    const { body: { items } } = await spotifyApi.getArtistAlbums(artistId);
-    return items;
-  },
-
-  getArtistTopTracks: async function(artistId) {
-    const { body: { tracks } } = await spotifyApi.getArtistTopTracks(artistId, 'US');
-    return tracks;
-  },
-
-  getAlbumTracks: async function(albumId) {
-    const { body: { items } } = await spotifyApi.getAlbumTracks(albumId);
-    return items;
-  }
 }
 
 var queryValue;

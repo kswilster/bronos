@@ -1,6 +1,6 @@
 require('babel-polyfill');
 var program = require('commander');
-
+import Zone from './models/zone';
 import Utils from './utils';
 
 process.on('uncaughtException', (err) => {
@@ -10,8 +10,10 @@ process.on('uncaughtException', (err) => {
 const app = {
   run: async function(message) {
     this.validateArgs(...arguments);
-    const zone = await Utils.getCurrentZone();
-    await Utils.say(zone.roomName, message);
+    const { roomName } = await Utils.getCurrentZone();
+    const zone = Zone.create({ roomName });
+    await zone.fetch();
+    zone.say(message);
   },
 
   validateArgs(message) {

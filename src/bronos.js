@@ -26,3 +26,7 @@ program
 // }
 
 program.parse(process.argv);
+
+// TODO: having a common entry point for sub-commands would be nice
+// it would mean only requiring babel-polyfill/ember-metal once
+// seems like yarn uses commander and does something along those lines...

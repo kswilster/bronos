@@ -1,6 +1,8 @@
 require('babel-polyfill');
 import Utils from './utils';
 import chalk from 'chalk';
+import Zone from './models/zone';
+const { get } = Ember;
 
 const TERMINAL_WIDTH = process.stdout.columns;
 const HORIZONTAL_RULE = '-'.repeat(TERMINAL_WIDTH);
@@ -8,13 +10,17 @@ const HORIZONTAL_RULE = '-'.repeat(TERMINAL_WIDTH);
 // TODO: what to do if queue is not in use?
 // NOTE: queue in use is indicated by zone.state.currentTrack.type === 'track'
 const run = async function() {
-  const currentZone = await Utils.getCurrentZone();
-  const queue = await Utils.getQueue(currentZone.roomName);
-  const trackNo = parseInt(currentZone.state.trackNo);
-  // show 9 tracks on either side of the current track
+  const { roomName } = await Utils.getCurrentZone();
+  const currentZone = Zone.create({ roomName });
+  await currentZone.fetch();
+  const queue = await currentZone.getQueue();
+
+  const trackNo = parseInt(get(currentZone, 'state').trackNo);
+
+  // show at most 9 tracks on either side of the current track
   const minTrack = trackNo - 9;
   const maxTrack = trackNo + 9;
-  const queueInUse = currentZone.state.currentTrack.type === 'track';
+  const queueInUse = get(currentZone, 'state').currentTrack.type === 'track';
   const queueInUseText = queueInUse ? 'QUEUE' : 'QUEUE (Not in use)';
 
   // highlight current track if queue is in use
@@ -62,22 +68,27 @@ function floatText(left, right) {
 };
 
 function getStatusFromZone(zone) {
-  const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
-  const artist = zone.state.currentTrack.artist;
-  const album = zone.state.currentTrack.album;
-  const track = zone.state.currentTrack.title;
-  const shuffleState = zone.state.playMode.shuffle ? 'ON' : 'OFF';
-  const crossfadeState = zone.state.playMode.crossfade ? 'ON' : 'OFF';
-  const repeatState = zone.state.playMode.repeat ? 'ON' : 'OFF';
+  // TODO: look into why Ember.get doesn't work for deep keys
+  const roomName = get(zone, 'roomName');
+  const state = get(zone, 'state');
+  const { playbackState, volume, currentTrack, playMode } = state;
+  const { artist, album, title } = currentTrack;
+  const { shuffle, crossfade, repeat } = playMode;
+
+  const playbackStateIcon = (playbackState === 'STOPPED') ? '❙❙' : '►';
+  const track = title;
+  const shuffleState = shuffle ? 'ON' : 'OFF';
+  const crossfadeState = crossfade ? 'ON' : 'OFF';
+  const repeatState = repeat ? 'ON' : 'OFF';
 
   const playbackStateText = `${playbackStateIcon} ${track} - ${artist}`;
-  const volumeText = `Volume: ${zone.state.volume}`;
+  const volumeText = `Volume: ${volume}`;
   const shuffleText = `Shuffle: ${shuffleState}`;
   const crossfadeText = `Crossfade: ${crossfadeState}`;
   const repeatText = `Repeat: ${repeatState}`;
 
   const statusArray = [];
-  statusArray.push(zone.roomName);
+  statusArray.push(roomName);
   if (track && track.length) {
     statusArray.push(`    ${playbackStateText}`);
   } else {
