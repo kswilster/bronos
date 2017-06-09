@@ -1,5 +1,5 @@
 require('babel-polyfill');
-import Utils from '../utils';
+import Utils from '~/utils';
 import assert from 'assert';
 
 const app = {

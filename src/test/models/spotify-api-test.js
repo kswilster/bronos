@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import moxios from 'moxios';
 import assert from 'assert';
 import Preferences from 'preferences';
-import SpotifyApi from '../../models/spotify-api';
+import SpotifyApi from 'models/spotify-api';
 
 let fakeTokenServer, tokenSpy;
 
