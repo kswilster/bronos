@@ -17,7 +17,7 @@ describe('spotify-api', function() {
 
   describe('#authenticate without established preferences', function() {
     const preferences = {};
-    const spotifyApi = SpotifyApi.create({ _preferences: preferences });
+    const spotifyApi = SpotifyApi.create({ preferences: preferences });
 
 
     it('calls the token server and caches the response', async function() {

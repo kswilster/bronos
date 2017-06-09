@@ -41,7 +41,7 @@
     "webpack": "^1.13.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.16.0",
+    "babel-cli": "^6.24.1",
     "babel-plugin-root-import": "^5.1.0",
     "mocha": "^3.4.2",
     "sinon": "^2.3.2"
