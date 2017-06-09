@@ -18,7 +18,7 @@ export default Ember.Object.extend({
   },
 
   async authenticate() {
-    const accessToken = await this._fetchTokenAndCache();
+    const accessToken = this._getCachedToken() || await this._fetchTokenAndCache();
     this.set('accessToken', accessToken);
     this.set('_api', new SpotifyWebApi({ accessToken }));
   },
@@ -83,25 +83,25 @@ export default Ember.Object.extend({
   },
 
   // cache the token with an expiration timestamp.
-  // because we might retrieve the token and perform some other
-  // async behavior before using it
-  // the cutoff is to ensure we never use expired tokens
   _cacheToken(token, expiresIn) {
     const preferences = this.get('preferences');
     const currentTime = Date.now();
-    const cutoff = 5000;
     const timeToLive = expiresIn * 1000;
-    const expiration = currentTime + timeToLive - cutoff;
+    const expiration = currentTime + timeToLive;
 
     preferences.tokenCache = { token, expiration };
   },
 
+  // because we might retrieve the token and perform some other
+  // async behavior before using it
+  // the cutoff is to ensure we never use expired tokens
   _getCachedToken() {
+    const cutoff = 5000;
     const preferences = this.get('preferences');
     const { token, expiration } = preferences.tokenCache || {};
     const currentTime = Date.now();
 
-    if (currentTime > expiration) {
+    if (currentTime > expiration - cutoff) {
       return;
     } else {
       return token;
