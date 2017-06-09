@@ -3,7 +3,7 @@ var moxios = require('moxios');
 var assert = require('assert');
 var Preferences = require('preferences');
 var fakeTokenServer, tokenSpy;
-var SpotifyApi = require('../../dist/models/spotify-api').default;
+var SpotifyApi = require('models/spotify-api').default;
 
 describe('spotify-api', function() {
   before(function() {

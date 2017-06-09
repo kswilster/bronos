@@ -4,7 +4,7 @@ import assert from 'assert';
 import axios from 'axios';
 import emberMetal from 'ember-metal';
 import emberRuntime from 'ember-runtime';
-import Utils from '../utils';
+import Utils from '~/utils';
 import path from 'path';
 
 const { fork } = require('child_process');

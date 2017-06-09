@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
+    "babel-plugin-root-import": "^5.1.0",
     "mocha": "^3.4.2",
     "moxios": "^0.4.0",
     "sinon": "^2.3.2"
