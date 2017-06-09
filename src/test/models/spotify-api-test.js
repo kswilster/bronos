@@ -1,9 +1,10 @@
-var sinon = require('sinon');
-var moxios = require('moxios');
-var assert = require('assert');
-var Preferences = require('preferences');
-var fakeTokenServer, tokenSpy;
-var SpotifyApi = require('../../dist/models/spotify-api').default;
+import sinon from 'sinon';
+import moxios from 'moxios';
+import assert from 'assert';
+import Preferences from 'preferences';
+import SpotifyApi from '../../models/spotify-api';
+
+let fakeTokenServer, tokenSpy;
 
 describe('spotify-api', function() {
   before(function() {
