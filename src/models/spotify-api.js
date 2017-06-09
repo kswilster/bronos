@@ -83,7 +83,7 @@ export default Ember.Object.extend({
   },
 
   // cache the token with an expiration timestamp.
-  // because we might retreive the token and perform some other
+  // because we might retrieve the token and perform some other
   // async behavior before using it
   // the cutoff is to ensure we never use expired tokens
   _cacheToken(token, expiresIn) {
@@ -91,8 +91,7 @@ export default Ember.Object.extend({
     const currentTime = Date.now();
     const cutoff = 5000;
     const timeToLive = expiresIn * 1000;
-    // const expiration = currentTime + timeToLive - cutoff;
-    const expiration = currentTime + cutoff;
+    const expiration = currentTime + timeToLive - cutoff;
 
     preferences.tokenCache = { token, expiration };
   },
