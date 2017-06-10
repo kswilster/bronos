@@ -3,30 +3,29 @@ import fauxJax from 'faux-jax';
 import assert from 'assert';
 import Preferences from 'preferences';
 import SpotifyApi from '~/models/spotify-api';
-
-let clock, globalSpy;
-
-before(function() {
-  fauxJax.install();
-  clock = sinon.useFakeTimers(100000);
-});
-
-after(function() {
-  fauxJax.restore();
-  clock.restore();
-});
-
-afterEach(function() {
-  fauxJax.removeAllListeners('request');
-});
+let clock;
 
 describe('spotify-api', function() {
 
+  before(function() {
+    fauxJax.install();
+    clock = sinon.useFakeTimers(100000);
+  });
+
+  after(function() {
+    fauxJax.restore();
+    clock.restore();
+  });
+
+  afterEach(function() {
+    fauxJax.removeAllListeners('request');
+  });
+
   describe('#authenticate without established preferences', function() {
-    const preferences = {};
-    const spotifyApi = SpotifyApi.create({ preferences });
 
     it('fetches a token and caches the response', async function() {
+      const preferences = {};
+      const spotifyApi = SpotifyApi.create({ preferences });
       // token time to live in seconds
       const token = 'fresh-new-token';
       const tokenTTL = 1;

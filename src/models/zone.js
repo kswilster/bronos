@@ -10,6 +10,10 @@ import path from 'path';
 const { fork } = require('child_process');
 
 export default Ember.Object.extend({
+  roomName: function() {
+    throw new Error('Zone requires a roomName');
+  }.property(),
+
   // base url for most actions
   baseURL: function() {
     const roomName = this.get('roomName');
@@ -22,13 +26,6 @@ export default Ember.Object.extend({
     const axiosInstance = axios.create({ baseURL });
     return axiosInstance;
   }.property('baseURL'),
-
-  // lifecycle hooks
-  init() {
-    const roomName = this.get('roomName');
-    // Zones require a roomName
-    assert.ok(typeof roomName === 'string', 'Zone requires a roomName');
-  },
 
   // getter actions
   fetch: async function() {
