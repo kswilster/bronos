@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node_modules/.bin/babel src -d dist",
     "watch": "node_modules/.bin/babel src -d dist -w",
-    "test": "mocha dist/test/*",
+    "test": "testem",
     "bronos": "node ./dist/bronos.js",
     "prepublish": "npm run build",
     "postinstall": "scripts/install-fzf",
@@ -44,7 +44,9 @@
     "babel-cli": "^6.24.1",
     "babel-plugin-root-import": "^5.1.0",
     "mocha": "^3.4.2",
-    "sinon": "^2.3.2"
+    "mocha-cli": "^1.0.1",
+    "sinon": "^2.3.2",
+    "testem": "^1.18.0"
   },
   "repository": {
     "type": "git",

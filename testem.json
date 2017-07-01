@@ -1,0 +1,13 @@
+{
+  "framework": "mocha",
+  "launchers": {
+    "Mocha": {
+      "command": "node node_modules/.bin/mocha dist/test/** -R tap",
+      "protocol": "tap"
+    }
+  },
+  "launch_in_dev" : [ "Mocha" ],
+  "src_files": [
+    "dist/**"
+  ]
+}
