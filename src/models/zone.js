@@ -134,12 +134,13 @@ export default Ember.Object.extend({
     return AppPreferences[preferencesNamespace];
   },
 
-  async getDefaultZone({ immediate=false }={}) {
+  async getDefaultZone({ immediate=false, serialize=false }={}) {
     const preferences = this.getPreferences();
     if (!preferences.defaultZone) return;
 
     const zone = this.create(preferences.defaultZone);
-    return immediate ? zone : await zone.fetch();
+    if (!immediate) await zone.fetch();
+    return serialize ? zone.serialize() : zone;
   },
 
   setDefaultZone(zone) {

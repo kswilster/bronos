@@ -3,6 +3,7 @@ require('babel-polyfill');
 var program = require('commander');
 
 import Utils from './utils';
+import Zone from '~/models/zone';
 import SpotifyApi from './models/spotify-api';
 
 process.on('uncaughtException', (err) => {
@@ -22,7 +23,7 @@ const app = {
 
       this.validateArgs(...arguments);
       await Utils.startSonosServer();
-      zone = await Utils.getCurrentZone();
+      const zone = await Zone.getDefaultZone({ serialize: true });
       Utils.selectQueue(zone);
 
       zoneName = zone.roomName;
