@@ -4,10 +4,11 @@ import assert from 'assert';
 import axios from 'axios';
 import emberMetal from 'ember-metal';
 import emberRuntime from 'ember-runtime';
-import Utils from '~/utils';
 import path from 'path';
+import { fork } from 'child_process';
 
-const { fork } = require('child_process');
+import Utils from '~/utils';
+import AppPreferences from '~/app-preferences';
 
 export default Ember.Object.extend({
   roomName: function() {
@@ -33,6 +34,7 @@ export default Ember.Object.extend({
     const url = `http://localhost:5005/${roomName}/state`;
     const response = await axios.get(url);
     this.set('state', response.data);
+    return this;
   },
 
   getQueue: async function() {
@@ -122,5 +124,26 @@ export default Ember.Object.extend({
 
   serialize() {
     return this.getProperties('roomName', 'state');
+  },
+}).reopenClass({
+  preferencesNamespace: 'models/zone',
+
+  getPreferences() {
+    const preferencesNamespace = this.preferencesNamespace;
+    AppPreferences[preferencesNamespace] = AppPreferences[preferencesNamespace] || {};
+    return AppPreferences[preferencesNamespace];
+  },
+
+  async getDefaultZone({ immediate=false }={}) {
+    const preferences = this.getPreferences();
+    if (!preferences.defaultZone) return;
+
+    const zone = this.create(preferences.defaultZone);
+    return immediate ? zone : await zone.fetch();
+  },
+
+  setDefaultZone(zone) {
+    const preferences = this.getPreferences();
+    preferences.defaultZone = zone.serialize();
   },
 });
