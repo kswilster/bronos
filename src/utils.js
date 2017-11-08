@@ -1,5 +1,6 @@
 require('babel-polyfill');
 import axios from 'axios';
+import Zone from '~/models/zone';
 
 var path = require('path');
 var webroot = path.resolve(__dirname, 'static');
@@ -23,21 +24,6 @@ const Utils = {
   get config() {
     this._config = this._config || new Preferences('com.lintcondition.bronos', {});
     return this._config;
-  },
-
-  getCurrentZone: async function() {
-    await this.startSonosServer();
-
-    if (this.config.zone) {
-      const zone = await this.getZone(this.config.zone.roomName);
-      if (zone) {
-        return zone;
-      } else {
-        return Promise.reject('No zones found');
-      }
-    } else {
-      return Promise.reject('No zone selected');
-    }
   },
 
   sleep(timeout) {

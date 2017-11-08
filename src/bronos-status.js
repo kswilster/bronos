@@ -1,7 +1,8 @@
 require('babel-polyfill');
 import _ from 'underscore';
-import Utils from './utils';
 import axios from 'axios';
+import Utils from '~/utils';
+import Zone from '~/models/zone';
 
 var os = require('os');
 var fs = require('fs');
@@ -60,7 +61,7 @@ const app = {
 
     var zone;
     try {
-      zone = testing ? fakeZone : await Utils.getCurrentZone();
+      zone = await Zone.getDefaultZone({ serialize: true });
     } catch (e) {
       console.error(e);
       process.exit();

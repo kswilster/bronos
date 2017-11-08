@@ -10,9 +10,7 @@ const HORIZONTAL_RULE = '-'.repeat(TERMINAL_WIDTH);
 // TODO: what to do if queue is not in use?
 // NOTE: queue in use is indicated by zone.state.currentTrack.type === 'track'
 const run = async function() {
-  const { roomName } = await Utils.getCurrentZone();
-  const currentZone = Zone.create({ roomName });
-  await currentZone.fetch();
+  const currentZone = await Zone.getDefaultZone();
   const queue = await currentZone.getQueue();
 
   const trackNo = parseInt(get(currentZone, 'state').trackNo);
