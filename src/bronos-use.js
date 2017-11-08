@@ -2,6 +2,7 @@ require('babel-polyfill');
 import _ from 'underscore';
 import Utils from './utils';
 import program from 'commander';
+import Zone from '~/models/zone';
 
 var os = require('os');
 var fs = require('fs');
@@ -40,7 +41,7 @@ const app = {
     }
     const zone = await this.chooseZone(zones);
 
-    Utils.config.zone = zone;
+    Zone.setDefaultZone(Zone.create(zone));
     console.log(`Switched to zone: ${zone.roomName}`);
     process.exit(1);
   },

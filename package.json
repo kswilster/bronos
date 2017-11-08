@@ -10,7 +10,8 @@
     "bronos": "node ./dist/bronos.js",
     "prepublish": "npm run build",
     "postinstall": "scripts/install-fzf",
-    "preuninstall": "scripts/uninstall-fzf"
+    "preuninstall": "scripts/uninstall-fzf",
+    "sandbox": "devtool dist/sandbox.js"
   },
   "bin": {
     "bronos": "./dist/bronos.js"
@@ -43,6 +44,7 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-plugin-root-import": "^5.1.0",
+    "glob": "^7.1.2",
     "mocha": "^3.4.2",
     "mocha-cli": "^1.0.1",
     "sinon": "^2.3.2",

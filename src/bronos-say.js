@@ -10,9 +10,7 @@ process.on('uncaughtException', (err) => {
 const app = {
   run: async function(message) {
     this.validateArgs(...arguments);
-    const { roomName } = await Utils.getCurrentZone();
-    const zone = Zone.create({ roomName });
-    await zone.fetch();
+    const zone = await Zone.getDefaultZone();
     zone.say(message);
   },
 
