@@ -9,6 +9,15 @@ import SpotifyWebApi from 'spotify-web-api-node';
 const APP_ID = 'com.lintcondition.bronos';
 const SPOTIFY_ACCESS_TOKEN_URL = 'https://oka1hz3dtb.execute-api.us-east-1.amazonaws.com/prod/spotifyAccessToken';
 
+axios.interceptors.response.use(function (response) {
+  // Do something with response data
+  return response;
+}, function (error) {
+  // Do something with response error
+  console.log(error.config.url);
+  return Promise.reject(error.url);
+});
+
 export default Ember.Object.extend({
 
   spotifyAccessTokenUrl: SPOTIFY_ACCESS_TOKEN_URL,

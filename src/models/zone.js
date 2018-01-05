@@ -29,11 +29,13 @@ export default Ember.Object.extend({
   }.property('baseURL'),
 
   // getter actions
-  fetch: async function() {
+  async fetch() {
     const roomName = this.get('roomName');
-    const url = `http://localhost:5005/${roomName}/state`;
+    const url = `http://localhost:5005/zones`;
     const response = await axios.get(url);
-    this.set('state', response.data);
+    const zone = response.data[0].members.find((member) => member.roomName === roomName);
+
+    this.setProperties(zone);
     return this;
   },
 
@@ -84,6 +86,13 @@ export default Ember.Object.extend({
     const axios = this.get('axios');
     const roomName = this.get('roomName');
     const url = encodeURI(`http://localhost:5005/${roomName}/say/${message}`);
+    this.backgroundMethod('axiosGet', url);
+  },
+
+  setVolume: async function(volume) {
+    const axios = this.get('axios');
+    const roomName = this.get('roomName');
+    const url = encodeURI(`http://localhost:5005/${roomName}/volume/${volume}`);
     this.backgroundMethod('axiosGet', url);
   },
 

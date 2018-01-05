@@ -15,7 +15,8 @@ program
   .command('say <message>', 'annoy your neighbors')
   .command('status', 'show current device status')
   .command('queue', 'show current device queue')
-  .command('use', 'select a device or group');
+  .command('use', 'select a device or group')
+  .command('volume', 'change volume of the selected room');
 
 // TODO: find command more reliably
 // const commandName = process.argv[2];
