@@ -1,6 +1,6 @@
 {
   "name": "bronos",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "A sonos cli for bros",
   "main": "dist/bronos.js",
   "scripts": {
