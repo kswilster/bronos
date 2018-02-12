@@ -1,8 +1,10 @@
 require('babel-polyfill');
+var program = require('commander');
 import _ from 'underscore';
 import axios from 'axios';
 import Utils from '~/utils';
 import Zone from '~/models/zone';
+import SpotifyApi from './models/spotify-api';
 
 var os = require('os');
 var fs = require('fs');
@@ -11,6 +13,7 @@ var imageToAscii = require("image-to-ascii");
 var stringify = require("asciify-pixel-matrix");
 
 const spotifyApi = new SpotifyWebApi();
+const spotify = SpotifyApi.create();
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
@@ -37,8 +40,7 @@ function sleep(timeout) {
 // NOTE: shuffle: true/false
 // NOTE: crossFade: true/false
 const app = {
-  run: async function() {
-    const showAlbumArt = false;
+  run: async function({ showAlbumArt = false } = {}) {
     const testing = false;
 
     const fakeZone = {
@@ -67,13 +69,13 @@ const app = {
       process.exit();
     }
 
-    const playbackStateIcon = (zone.state.playbackState === 'STOPPED') ? '❙❙' : '►';
+    const playbackStateIcon = (zone.state.playbackState === 'PAUSED_PLAYBACK') ? '❙❙' : '►';
     const artist = zone.state.currentTrack.artist;
     const album = zone.state.currentTrack.album;
     const track = zone.state.currentTrack.title;
     const shuffleState = zone.state.playMode.shuffle ? 'ON' : 'OFF';
     const crossfadeState = zone.state.playMode.crossfade ? 'ON' : 'OFF';
-    const repeatState = zone.state.playMode.repeat ? 'ON' : 'OFF';
+    const repeatState = zone.state.playMode.repeat.toUpperCase();
 
     const playbackStateText = `${playbackStateIcon} ${track} - ${artist}`;
     const volumeText = `Volume: ${zone.state.volume}`;
@@ -93,7 +95,6 @@ const app = {
     statusArray.push(`    ${repeatText}`);
     statusArray.push(`    ${crossfadeText}`);
 
-    // TODO: handle album art failure better
     if (album && album.length && showAlbumArt) {
       try {
         const albumArtUrl = await this.getAlbumArtURL(artist, album);
@@ -101,18 +102,20 @@ const app = {
         const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
         console.log(albumArt);
       } catch (e) {
+        console.log('error showing ascii art', e);
         console.log(statusArray.join('\n'));
       }
     } else {
       console.log(statusArray.join('\n'));
     }
-
   },
 
   getAlbumArtURL: async function(artist, album) {
-    const query = `https://api.spotify.com/v1/search?q=album:${album}%20artist:${artist}&type=album`;
-    const { albums: { items } } = await this.spotifyRequest(query);
-    return items[0].images[2].url;
+    await spotify.authenticate();
+    const albums = await spotify.findAlbums(album);
+    // const query = `https://api.spotify.com/v1/search?q=album:${album}%20artist:${artist}&type=album`;
+    // const { albums: { items } } = await this.spotifyRequest(query);
+    return albums[0].images[2].url;
   },
 
   spotifyRequest: async function(url) {
@@ -210,4 +213,8 @@ const app = {
   },
 };
 
-app.run();
+program
+  .option('-a, --art', 'Show album art in ascii text')
+  .parse(process.argv);
+
+app.run({ showAlbumArt: program.art });

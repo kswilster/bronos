@@ -27,7 +27,7 @@ describe('zone', function() {
   describe('#fetch with roomName', function() {
     it('fetches zone status', async function() {
       const zone = Zone.create({ roomName: 'Living Room' });
-      const respond = respondSpy(ZONE_STATE);
+      const respond = respondSpy(ZONE_RESPONSE);
 
       await zone.fetch();
       assert.ok(respond.calledOnce);
@@ -59,36 +59,100 @@ async function asyncThrows(fn) {
   })
 }
 
-const ZONE_STATE = {
-    currentTrack: {
-      artist: 'Rihanna',
-      title: 'Kiss it Better',
-      album: 'ANTI',
-      albumArtUri: '/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a1XrrzhGLErbkiwH5v3xww9%3fsid%3d12%26flags%3d8224%26sn%3d10',
-      duration: 120,
-      uri: 'x-sonos-spotify:spotify%3atrack%3a1XrrzhGLErbkiwH5v3xww9?sid=12&flags=8224&sn=10',
-      type: 'track',
-      stationName: '',
-      absoluteAlbumArtUri: 'http://10.10.30.252:1400/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a1XrrzhGLErbkiwH5v3xww9%3fsid%3d12%26flags%3d8224%26sn%3d10'
-    },
-    nextTrack: {
-      artist: 'Rihanna',
-      title: 'Work',
-      album: 'ANTI',
-      albumArtUri: '/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a4gFxywaJejXWxo0NjlWzgg%3fsid%3d12%26flags%3d8224%26sn%3d10',
-      duration: 223,
-      uri: 'x-sonos-spotify:spotify%3atrack%3a4gFxywaJejXWxo0NjlWzgg?sid=12&flags=8224&sn=10',
-      absoluteAlbumArtUri: 'http://10.10.30.252:1400/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a4gFxywaJejXWxo0NjlWzgg%3fsid%3d12%26flags%3d8224%26sn%3d10'
-    },
-    volume: 53,
-    mute: false,
-    trackNo: 1,
-    elapsedTime: 45,
-    elapsedTimeFormatted: '00:00:45',
-    playbackState: 'PLAYING',
-    playMode: {
-      repeat: 'none',
-      shuffle: false,
-      crossfade: false
-    }
-  }
+const ZONE_RESPONSE = [{
+	"uuid": "RINCON_B8E937E8EE5201400",
+	"coordinator": {
+		"uuid": "RINCON_B8E937E8EE5201400",
+		"state": {
+			"volume": 48,
+			"mute": false,
+			"equalizer": {
+				"bass": 0,
+				"treble": 0,
+				"loudness": true
+			},
+			"currentTrack": {
+				"artist": "ScHoolboy Q",
+				"title": "THat Part",
+				"album": "Blank Face LP",
+				"albumArtUri": "/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a2yJ9GVCLMmzBBfQAnfzlwr%3fsid%3d12%26flags%3d8224%26sn%3d10",
+				"duration": 313,
+				"uri": "x-sonos-spotify:spotify%3atrack%3a2yJ9GVCLMmzBBfQAnfzlwr?sid=12&flags=8224&sn=10",
+				"type": "track",
+				"stationName": "",
+				"absoluteAlbumArtUri": "http://10.0.0.244:1400/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a2yJ9GVCLMmzBBfQAnfzlwr%3fsid%3d12%26flags%3d8224%26sn%3d10"
+			},
+			"nextTrack": {
+				"artist": "Death Grips",
+				"title": "World Of Dogs",
+				"album": "No Love Deep Web",
+				"albumArtUri": "/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a1vsdF31uQBAxLTXIUAke6T%3fsid%3d12%26flags%3d8224%26sn%3d10",
+				"duration": 162,
+				"uri": "x-sonos-spotify:spotify%3atrack%3a1vsdF31uQBAxLTXIUAke6T?sid=12&flags=8224&sn=10",
+				"absoluteAlbumArtUri": "http://10.0.0.244:1400/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a1vsdF31uQBAxLTXIUAke6T%3fsid%3d12%26flags%3d8224%26sn%3d10"
+			},
+			"trackNo": 8,
+			"elapsedTime": 26,
+			"elapsedTimeFormatted": "00:00:26",
+			"playbackState": "STOPPED",
+			"playMode": {
+				"repeat": "none",
+				"shuffle": false,
+				"crossfade": false
+			}
+		},
+		"roomName": "MMXXIVXY",
+		"coordinator": "RINCON_B8E937E8EE5201400",
+		"groupState": {
+			"volume": 48,
+			"mute": false
+		}
+	},
+	"members": [{
+		"uuid": "RINCON_B8E937E8EE5201400",
+		"state": {
+			"volume": 48,
+			"mute": false,
+			"equalizer": {
+				"bass": 0,
+				"treble": 0,
+				"loudness": true
+			},
+			"currentTrack": {
+				"artist": "ScHoolboy Q",
+				"title": "THat Part",
+				"album": "Blank Face LP",
+				"albumArtUri": "/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a2yJ9GVCLMmzBBfQAnfzlwr%3fsid%3d12%26flags%3d8224%26sn%3d10",
+				"duration": 313,
+				"uri": "x-sonos-spotify:spotify%3atrack%3a2yJ9GVCLMmzBBfQAnfzlwr?sid=12&flags=8224&sn=10",
+				"type": "track",
+				"stationName": "",
+				"absoluteAlbumArtUri": "http://10.0.0.244:1400/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a2yJ9GVCLMmzBBfQAnfzlwr%3fsid%3d12%26flags%3d8224%26sn%3d10"
+			},
+			"nextTrack": {
+				"artist": "Death Grips",
+				"title": "World Of Dogs",
+				"album": "No Love Deep Web",
+				"albumArtUri": "/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a1vsdF31uQBAxLTXIUAke6T%3fsid%3d12%26flags%3d8224%26sn%3d10",
+				"duration": 162,
+				"uri": "x-sonos-spotify:spotify%3atrack%3a1vsdF31uQBAxLTXIUAke6T?sid=12&flags=8224&sn=10",
+				"absoluteAlbumArtUri": "http://10.0.0.244:1400/getaa?s=1&u=x-sonos-spotify%3aspotify%253atrack%253a1vsdF31uQBAxLTXIUAke6T%3fsid%3d12%26flags%3d8224%26sn%3d10"
+			},
+			"trackNo": 8,
+			"elapsedTime": 26,
+			"elapsedTimeFormatted": "00:00:26",
+			"playbackState": "STOPPED",
+			"playMode": {
+				"repeat": "none",
+				"shuffle": false,
+				"crossfade": false
+			}
+		},
+		"roomName": "MMXXIVXY",
+		"coordinator": "RINCON_B8E937E8EE5201400",
+		"groupState": {
+			"volume": 48,
+			"mute": false
+		}
+	}]
+}];

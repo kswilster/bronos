@@ -33,7 +33,17 @@ export default Ember.Object.extend({
     const roomName = this.get('roomName');
     const url = `http://localhost:5005/zones`;
     const response = await axios.get(url);
-    const zone = response.data[0].members.find((member) => member.roomName === roomName);
+    let zone;
+
+    outerloop:
+    for (let group of response.data) {
+      for (let member of group.members) {
+        if (member.roomName === roomName) {
+          zone = member;
+          break outerloop;
+        }
+      }
+    }
 
     this.setProperties(zone);
     return this;

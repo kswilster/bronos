@@ -29,7 +29,7 @@ export default Ember.Object.extend({
   async authenticate() {
     const accessToken = this._getCachedToken() || await this._fetchTokenAndCache();
     this.set('accessToken', accessToken);
-    this.set('_api', new SpotifyWebApi({ accessToken }));
+    this.set('__api', new SpotifyWebApi({ accessToken }));
   },
 
   // SpotifyWebApi helper methods
@@ -74,8 +74,15 @@ export default Ember.Object.extend({
 
   // private
   _api: function() {
-    throw new Error('SpotifyApi must be authenticated before use');
-  },
+    const __api = this.get('__api');
+    if (__api) {
+      return __api;
+    } else {
+      throw new Error('SpotifyApi must be authenticated before use');
+    }
+  }.property(),
+
+  __api: null,
 
   preferences: function() {
     return new Preferences(APP_ID, {});
