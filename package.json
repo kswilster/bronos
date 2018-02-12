@@ -32,7 +32,6 @@
     "commander": "git+https://github.com/tj/commander.js.git",
     "ember-runtime": "^0.9.2",
     "faux-jax": "^5.0.6",
-    "image-to-ascii": "^3.0.3",
     "jquery": "^3.2.1",
     "jsdom": "^11.0.0",
     "preferences": "^0.2.1",
@@ -49,6 +48,9 @@
     "mocha-cli": "^1.0.1",
     "sinon": "^2.3.2",
     "testem": "^1.18.0"
+  },
+  "optionalDependencies": {
+    "image-to-ascii": "^3.0.11"
   },
   "repository": {
     "type": "git",

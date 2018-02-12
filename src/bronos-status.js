@@ -9,8 +9,11 @@ import SpotifyApi from './models/spotify-api';
 var os = require('os');
 var fs = require('fs');
 var SpotifyWebApi = require('spotify-web-api-node');
-var imageToAscii = require("image-to-ascii");
 var stringify = require("asciify-pixel-matrix");
+
+try {
+  var imageToAscii = require("image-to-ascii");
+} catch (e) {}
 
 const spotifyApi = new SpotifyWebApi();
 const spotify = SpotifyApi.create();
@@ -42,6 +45,7 @@ function sleep(timeout) {
 const app = {
   run: async function({ showAlbumArt = false } = {}) {
     const testing = false;
+    showAlbumArt = imageToAscii ? showAlbumArt : false;
 
     const fakeZone = {
       roomName: 'Living Room',
@@ -123,6 +127,8 @@ const app = {
   },
 
   createAlbumArtMatrix: async function(imgUrl, textArray) {
+    if (!imageToAscii) return;
+
     const promise = new Promise((resolve, reject) => {
       imageToAscii(imgUrl, {
         bg: true,
