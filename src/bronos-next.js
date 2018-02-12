@@ -1,9 +1,11 @@
 require('babel-polyfill');
-import Utils from './utils';
+import Zone from './models/zone';
 
-function run() {
-  const currentZone = Utils.config.zone;
-  Utils.next(currentZone.roomName);
+const app = {
+  async run() {
+    const zone = await Zone.getDefaultZone();
+    zone.next();
+  },
 }
 
-run();
+app.run();
