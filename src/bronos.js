@@ -15,6 +15,7 @@ program
   .command('say <message>', 'annoy your neighbors')
   .command('status', 'show current device status')
   .command('queue', 'show current device queue')
+  .command('clearqueue', 'clear current device queue')
   .command('use', 'select a device or group')
   .command('volume', 'change volume of the selected room');
 

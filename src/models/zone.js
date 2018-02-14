@@ -92,6 +92,12 @@ export default Ember.Object.extend({
     return axios.get(url);
   },
 
+  clearQueue: async function() {
+    const axios = this.get('axios');
+    const response = await axios.get('/clearqueue');
+    return response.data;
+  },
+
   say: async function(message) {
     const axios = this.get('axios');
     const roomName = this.get('roomName');
