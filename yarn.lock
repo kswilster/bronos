@@ -1845,6 +1845,10 @@ html-entities@1.0.x:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-1.0.10.tgz#0dea59130dd50df154e82c4cf71d08c2c9dc968b"
 
+html-entities@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-1.2.1.tgz#0df29351f0721163515dfb9e5543e5f6eed5162f"
+
 http-errors@~1.6.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/http-errors/-/http-errors-1.6.1.tgz#5f8b8ed98aca545656bf572997387f904a722257"
@@ -1892,9 +1896,9 @@ image-parser@^1.0.0:
     noop6 "^1.0.4"
     pixel-class "^1.0.0"
 
-image-to-ascii@^3.0.3:
-  version "3.0.7"
-  resolved "https://registry.yarnpkg.com/image-to-ascii/-/image-to-ascii-3.0.7.tgz#7f314330399f74ec8494dbdd06940d1ff71413f5"
+image-to-ascii@^3.0.11:
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/image-to-ascii/-/image-to-ascii-3.0.11.tgz#be39c96538d5d876e5c752104c95e374585b6adb"
   dependencies:
     asciify-pixel-matrix "^1.0.0"
     compute-size "^1.0.1"
@@ -3061,6 +3065,10 @@ ripemd160@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/ripemd160/-/ripemd160-0.2.0.tgz#2bf198bde167cacfa51c0a928e84b68bbe171fce"
 
+rsvp@^4.8.1:
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-4.8.1.tgz#168addb3963222de37ee351b70e3876bdb2ac285"
+
 safe-buffer@^5.0.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
@@ -3238,14 +3246,15 @@ socket.io@1.6.0:
     html-entities "1.0.x"
     xml-flow "^1.0.1"
 
-"sonos-http-api@https://github.com/jishi/node-sonos-http-api/archive/master.tar.gz":
-  version "1.4.1"
-  resolved "https://github.com/jishi/node-sonos-http-api/archive/master.tar.gz#5ea910487235f693ec6450d9d1dbbde1088de729"
+"sonos-http-api@https://github.com/jishi/node-sonos-http-api/archive/v1.4.3.tar.gz":
+  version "1.4.3"
+  resolved "https://github.com/jishi/node-sonos-http-api/archive/v1.4.3.tar.gz#68ca00d0fc3af26ed7d6175ab45afc938e1e1190"
   dependencies:
     anesidora "^1.2.0"
     aws-sdk "^2.12.0"
     basic-auth "~1.1.0"
     fuse.js "^2.5.0"
+    html-entities "^1.2.1"
     json5 "^0.5.1"
     node-static "~0.7.0"
     request-promise "~1.0.2"
