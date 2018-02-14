@@ -148,7 +148,8 @@ const Utils = {
     // TODO: use webhook to determine that the sonos server is ready (for now just sleeping)
 
     if (!this.isSonosServerRunning()) {
-      const sonosServerPath = path.normalize(`${__dirname}/../node_modules/sonos-http-api/server.js`);
+      const sonosDir = require.resolve('sonos-http-api');
+      const sonosServerPath = path.join(sonosDir, '../..', 'server.js');
       const server = spawn(process.argv[0], [sonosServerPath], {
         detached: true,
         stdio: 'ignore'
@@ -160,6 +161,7 @@ const Utils = {
         await this.pollCondition(this.isSonosServerRunning, { message: 'Failed to start sonos server' });
       } catch (e) {
         console.error('Failed to start sonos server');
+        console.error(e);
         process.exit();
       }
     }
