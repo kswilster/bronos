@@ -30,6 +30,7 @@ export default Ember.Object.extend({
     const accessToken = this._getCachedToken() || await this._fetchTokenAndCache();
     this.set('accessToken', accessToken);
     this.set('__api', new SpotifyWebApi({ accessToken }));
+    return this;
   },
 
   // SpotifyWebApi helper methods
