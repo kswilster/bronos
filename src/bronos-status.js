@@ -23,21 +23,6 @@ function handleError (err) {
   exit();
 }
 
-function sleep(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-}
-
-// TODO: update config from sonos player
-// TODO: validate config structure?
-// TODO: node-image-to-ascii for album art
-
-// NOTE: repeat (all, none, one?)
-// NOTE: shuffle: true/false
-// NOTE: crossFade: true/false
 const app = Command.extend({
   needsSpotifyApi: true,
 
