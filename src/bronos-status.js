@@ -4,20 +4,15 @@ import _ from 'underscore';
 import axios from 'axios';
 import Utils from '~/utils';
 import Zone from '~/models/zone';
-import SpotifyApi from './models/spotify-api';
 import Command from '~/models/command';
 
 var os = require('os');
 var fs = require('fs');
-var SpotifyWebApi = require('spotify-web-api-node');
 var stringify = require("asciify-pixel-matrix");
 
 try {
   var imageToAscii = require("image-to-ascii");
 } catch (e) {}
-
-const spotifyApi = new SpotifyWebApi();
-const spotify = SpotifyApi.create();
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
@@ -44,6 +39,8 @@ function sleep(timeout) {
 // NOTE: shuffle: true/false
 // NOTE: crossFade: true/false
 const app = Command.extend({
+  needsSpotifyApi: true,
+
   main: async function({ showAlbumArt = false } = {}) {
     const testing = false;
     showAlbumArt = imageToAscii ? showAlbumArt : false;
@@ -116,15 +113,9 @@ const app = Command.extend({
   },
 
   getAlbumArtURL: async function(artist, album) {
-    await spotify.authenticate();
+    const spotify = this.get('spotifyApi');
     const albums = await spotify.findAlbums(album);
-    // const query = `https://api.spotify.com/v1/search?q=album:${album}%20artist:${artist}&type=album`;
-    // const { albums: { items } } = await this.spotifyRequest(query);
     return albums[0].images[2].url;
-  },
-
-  spotifyRequest: async function(url) {
-    return axios.get(url).then(({ data }) => data);
   },
 
   createAlbumArtMatrix: async function(imgUrl, textArray) {
