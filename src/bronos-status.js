@@ -27,26 +27,7 @@ const app = Command.extend({
   needsSpotifyApi: true,
 
   main: async function({ showAlbumArt = false } = {}) {
-    const testing = false;
     showAlbumArt = imageToAscii ? showAlbumArt : false;
-
-    const fakeZone = {
-      roomName: 'Living Room',
-      state: {
-        playbackState: 'PLAYING',
-        currentTrack: {
-          artist: 'Drake',
-          album: 'Nothing Was the Same',
-          title: 'Started From the Bottom'
-        },
-        playMode: {
-          shuffle: false,
-          crossFade: true,
-          repeat: false
-        },
-        volume: 65
-      }
-    };
 
     var zone;
     try {
@@ -85,7 +66,6 @@ const app = Command.extend({
     if (album && album.length && showAlbumArt) {
       try {
         const albumArtUrl = await this.getAlbumArtURL(artist, album);
-        // const albumArtUrl = 'http://content.whas11.com/photo/2016/09/09/red_river_gorge_1473447099143_5985427_ver1.0.jpg';
         const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
         console.log(albumArt);
       } catch (e) {
