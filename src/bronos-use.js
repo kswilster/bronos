@@ -3,6 +3,7 @@ import _ from 'underscore';
 import Utils from './utils';
 import program from 'commander';
 import Zone from '~/models/zone';
+import Command from '~/models/command';
 
 var os = require('os');
 var fs = require('fs');
@@ -29,8 +30,8 @@ function sleep(timeout) {
   });
 }
 
-const app = {
-  run: async function() {
+const app = Command.create({
+  main: async function() {
     await Utils.startSonosServer();
     var zones = [];
 
@@ -57,7 +58,7 @@ const app = {
     const zone = zones[index];
     return zone;
   }
-};
+});
 
 // completely custom help
 if( process.argv.indexOf( '-h' ) !== -1 || process.argv.indexOf( '--help' ) !== -1 ) {
@@ -72,4 +73,4 @@ if( process.argv.indexOf( '-h' ) !== -1 || process.argv.indexOf( '--help' ) !== 
 }
 
 program.parse(process.argv);
-app.run();
+app.create().run();

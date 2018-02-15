@@ -1,9 +1,9 @@
 require('babel-polyfill');
 import Zone from '~/models/zone';
-import Command from '~/models/zone';
+import Command from '~/models/command';
 
 const app = Command.extend({
-  async run() {
+  async main() {
     const zone = await Zone.getDefaultZone();
     zone.next();
   },

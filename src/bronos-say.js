@@ -2,13 +2,14 @@ require('babel-polyfill');
 var program = require('commander');
 import Zone from './models/zone';
 import Utils from './utils';
+import Command from '~/models/command';
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
 });
 
-const app = {
-  run: async function(message) {
+const app = Command.extend({
+  main: async function(message) {
     this.validateArgs(...arguments);
     const zone = await Zone.getDefaultZone();
     zone.say(message);
@@ -20,11 +21,11 @@ const app = {
       process.exit(1);
     }
   }
-}
+});
 
 program
   .arguments('<message...>')
   .action(function(messageArray) {
-    app.run(messageArray.join(' '));
+    app.create().run(messageArray.join(' '));
   })
   .parse(process.argv);

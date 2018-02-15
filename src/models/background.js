@@ -2,7 +2,7 @@ require('babel-polyfill');
 import Utils from '~/utils';
 import assert from 'assert';
 
-const app = {
+const worker = {
   run: async function() {
     // keep alive for a second waiting for message
     const timeout = Utils.sleep(1000);
@@ -26,4 +26,4 @@ const app = {
   },
 }
 
-app.run();
+worker.run();

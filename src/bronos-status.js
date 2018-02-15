@@ -5,6 +5,7 @@ import axios from 'axios';
 import Utils from '~/utils';
 import Zone from '~/models/zone';
 import SpotifyApi from './models/spotify-api';
+import Command from '~/models/command';
 
 var os = require('os');
 var fs = require('fs');
@@ -42,8 +43,8 @@ function sleep(timeout) {
 // NOTE: repeat (all, none, one?)
 // NOTE: shuffle: true/false
 // NOTE: crossFade: true/false
-const app = {
-  run: async function({ showAlbumArt = false } = {}) {
+const app = Command.extend({
+  main: async function({ showAlbumArt = false } = {}) {
     const testing = false;
     showAlbumArt = imageToAscii ? showAlbumArt : false;
 
@@ -217,10 +218,10 @@ const app = {
 
     return stringify.stringifyMatrix(ascii);
   },
-};
+});
 
 program
   .option('-a, --art', 'Show album art in ascii text')
   .parse(process.argv);
 
-app.run({ showAlbumArt: program.art });
+app.create().run({ showAlbumArt: program.art });
