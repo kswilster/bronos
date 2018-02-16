@@ -1,6 +1,7 @@
 require('babel-polyfill');
 import axios from 'axios';
 import Zone from '~/models/zone';
+import _ from 'underscore';
 
 var path = require('path');
 var webroot = path.resolve(__dirname, 'static');
@@ -158,7 +159,8 @@ const Utils = {
       server.unref();
 
       try {
-        await this.pollCondition(this.isSonosServerRunning, { message: 'Failed to start sonos server' });
+        const isSonosServerRunning = _.bind(this.isSonosServerRunning, this);
+        await this.pollCondition(isSonosServerRunning, { message: 'Failed to start sonos server' });
       } catch (e) {
         console.error('Failed to start sonos server');
         console.error(e);
@@ -168,6 +170,7 @@ const Utils = {
   },
 
   // select the queue for use (as opposed to a playlist, line-in, or nothing)
+  // TODO: should be a zone action
   selectQueue: async function({ roomName, uuid }) {
     // TODO: how can we determine if a queue has been selected so we don't do this all the time?
     // NOTE: this is a pretty harmless, seemingly idempotent action
@@ -180,10 +183,15 @@ const Utils = {
   },
 
   isSonosServerRunning() {
-    // TODO: be more discerning with identifying the sonos server process
+    return !!this.getSonosServerPID();
+  },
+
+  // TODO: use global config for sonos server port
+  getSonosServerPID() {
     const openNetworkFiles = execSync(`lsof -i -n -P`).toString();
-    const serverRunning = !!openNetworkFiles.match(/:5005\b/);
-    return serverRunning;
+    const matches = openNetworkFiles.match(/node\s*(\d+)[^\n]+:5005/);
+    const pid = matches && matches[1];
+    return pid;
   },
 
   zonesDetected() {

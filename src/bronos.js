@@ -17,7 +17,8 @@ program
   .command('queue', 'show current device queue')
   .command('clearqueue', 'clear current device queue')
   .command('use', 'select a device or group')
-  .command('volume', 'change volume of the selected room');
+  .command('volume', 'change volume of the selected room')
+  .command('shutdown', 'kill the sonos server (for debugging, or if rooms are missing)');
 
 // TODO: find command more reliably
 // const commandName = process.argv[2];
