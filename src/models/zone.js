@@ -135,6 +135,23 @@ export default Ember.Object.extend({
     return promise;
   },
 
+  addTracks: async function(trackIds, action = 'queue', index = 0) {
+    const axios = this.get('axios');
+    let response;
+
+    if (trackIds.length > 1) {
+      const baseEndpoint = `/spotifymulti/${action}/${index}/`;
+      const trackURIs = trackIds.map(trackId => `spotify:track:${trackId}`);
+      const trackURIsJoined = trackURIs.join('/');
+      response = await axios.get(`${baseEndpoint}${trackURIsJoined}`);
+    } else {
+      const trackURI = `spotify:track:${trackIds[0]}`;
+      response = await axios.get(`/spotify/${action}/${trackURI}/${index}`);
+    }
+
+    return response.data;
+  },
+
   // TODO: extract this into base model
   backgroundMethod(methodName, ...args) {
     const modelName = 'zone';

@@ -116,34 +116,6 @@ const Utils = {
     return axios.get(url);
   },
 
-  playTrack: function(zoneName, trackId) {
-    const url = `http://localhost:5005/${zoneName}/spotify/now/spotify:track:${trackId}`;
-    return axios.get(url);
-  },
-
-  playTrackNext: function(zoneName, trackId) {
-    const url = `http://localhost:5005/${zoneName}/spotify/next/spotify:track:${trackId}`;
-    return axios.get(url);
-  },
-
-  queueTrack: async function(zoneName, trackId, index) {
-    // Sonos API is indexed at 1, that's no fun
-    index++;
-
-    const promise = new Promise(function(resolve, reject) {
-
-      const baseUrl = `http://localhost:5005/${zoneName}/spotify/queue/spotify:track:${trackId}`;
-      const indexParam = index ? `/${index}` : '';
-      const url = encodeURI(`${baseUrl}${indexParam}`);
-
-      axios.get(url, function() {
-        resolve();
-      });
-    });
-
-    return promise;
-  },
-
   startSonosServer: async function() {
     // TODO: ensure this method is idempotent
     // TODO: use webhook to determine that the sonos server is ready (for now just sleeping)

@@ -13,7 +13,7 @@ process.on('uncaughtException', (err) => {
 const app = {
   spotifyApi: null,
 
-  run: async function(query, { type='track', index=-1, play, next }) {
+  run: async function(query, { type='track', index, play, next }) {
     // TODO: better error handling
     var zone, zoneName, trackIds;
 
@@ -23,10 +23,8 @@ const app = {
 
       this.validateArgs(...arguments);
       await Utils.startSonosServer();
-      const zone = await Zone.getDefaultZone({ serialize: true });
-      Utils.selectQueue(zone);
-
-      zoneName = zone.roomName;
+      const zone = await Zone.getDefaultZone();
+      Utils.selectQueue(zone.serialize());
 
       if (type === 'artist') {
         trackIds = await this.searchByArtist(query);
@@ -36,16 +34,12 @@ const app = {
         trackIds = await this.searchByTrack(query);
       }
 
-      const queue = await Utils.getQueue(zoneName);
+      zoneName = zone.get('roomName');
+      const queue = await zone.getQueue();
+      index = index || queue.length + 1;
 
-      // TODO: implement multi-track playTrack and playTrackNext
-      if (play) {
-        Utils.playTrack(zoneName, trackIds[0]);
-      } else if (next) {
-        Utils.playTrackNext(zoneName, trackIds[0]);
-      } else {
-        this._queueTrack(zoneName, trackIds[0], index, queue.length);
-      }
+      const action = (play && 'now') || (next && 'next') || 'queue';
+      zone.addTracks(trackIds, action, index);
     } catch (e) {
       console.log(e.stack);
     }
@@ -74,29 +68,6 @@ const app = {
       console.error(`invalid queueBefore index: ${index}`);
       process.exit(1);
     }
-  },
-
-  _queueTrack: async function(zoneName, trackId, index=-1, queueLength) {
-    if (index === -1) {
-      index = queueLength;
-    }
-
-    Utils.queueTrack(zoneName, trackId, index);
-  },
-
-  _queueTracks: async function(zoneName, trackIds, index=-1, queueLength) {
-    if (index === -1) {
-      index = queueLength;
-    }
-
-    // TODO: implement addMultipleURIsToQueue and stop sending all these requests
-    // to queue multiple songs
-    // NOTE: avoid using _queueTracks for now because this is awful
-    trackIds.forEach(async function(trackId) {
-      console.log(`queueTracks ${zoneName} ${trackIds} ${index} ${queueLength}`);
-      await Utils.queueTrack(zoneName, trackId, index);
-      index++;
-    });
   },
 
   searchByArtist: async function(query) {
