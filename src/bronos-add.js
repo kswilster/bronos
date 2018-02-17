@@ -1,28 +1,23 @@
 require('babel-polyfill');
-
 var program = require('commander');
 
 import Utils from './utils';
 import Zone from '~/models/zone';
-import SpotifyApi from './models/spotify-api';
+import Command from '~/models/command';
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
 });
 
-const app = {
-  spotifyApi: null,
+const app = Command.extend({
+  needsSpotifyApi: true,
 
-  run: async function(query, { type='track', index, play, next }) {
+  main: async function(query, { type='track', index, play, next }) {
     // TODO: better error handling
     var zone, zoneName, trackIds;
 
     try {
-      this.spotifyApi = SpotifyApi.create();
-      await this.spotifyApi.authenticate();
-
       this.validateArgs(...arguments);
-      await Utils.startSonosServer();
       const zone = await Zone.getDefaultZone();
       Utils.selectQueue(zone.serialize());
 
@@ -45,14 +40,6 @@ const app = {
     }
   },
 
-  getSpotifyApi: async function() {
-    const accessToken = await Utils.getSpotifyAccessToken();
-    const spotifyApi = new SpotifyWebApi({ accessToken });
-
-    // spotifyApi.setAccessToken(spotifyApi);
-    return spotifyApi;
-  },
-
   validateArgs(query, { type='track', index=0 }) {
     if (!query) {
       console.error('no query given!');
@@ -71,30 +58,33 @@ const app = {
   },
 
   searchByArtist: async function(query) {
-    const artists = await this.spotifyApi.findArtists(query);
+    const spotifyApi = this.get('spotifyApi');
+    const artists = await spotifyApi.findArtists(query);
     const artistId = await this.chooseArtist(artists);
-    const albums = await this.spotifyApi.getArtistAlbums(artistId);
+    const albums = await spotifyApi.getArtistAlbums(artistId);
     const albumId = await this.chooseAlbum(albums, { includeTopTracks: true });
 
     var tracks;
     if (albumId === 'TOP_TRACKS') {
-      tracks = await this.spotifyApi.getArtistTopTracks(artistId);
+      tracks = await spotifyApi.getArtistTopTracks(artistId);
     } else {
-      tracks = await this.spotifyApi.getAlbumTracks(albumId);
+      tracks = await spotifyApi.getAlbumTracks(albumId);
     }
 
     return await this.chooseTracks(tracks);
   },
 
   searchByAlbum: async function(query) {
-    const albums = await this.spotifyApi.findAlbums(query);
+    const spotifyApi = this.get('spotifyApi');
+    const albums = await spotifyApi.findAlbums(query);
     const albumId = await this.chooseAlbum(albums);
-    const tracks = await this.spotifyApi.getAlbumTracks(albumId);
+    const tracks = await spotifyApi.getAlbumTracks(albumId);
     return await this.chooseTracks(tracks);
   },
 
   searchByTrack: async function(query) {
-    const tracks = await this.spotifyApi.findTracks(query);
+    const spotifyApi = this.get('spotifyApi');
+    const tracks = await spotifyApi.findTracks(query);
     return await this.chooseTracks(tracks);
   },
 
@@ -153,7 +143,7 @@ const app = {
 
     return chosenTrackIds;
   },
-}
+});
 
 var queryValue;
 
@@ -165,7 +155,7 @@ program
   .option('-t, --type [<type>]', 'type of entity to search for (artist | album | track). Defaults to track')
   .action(function(query, options) {
     queryValue = query;
-    app.run(query.join(' '), options);
+    app.create().run(query.join(' '), options);
   })
   .parse(process.argv);
 

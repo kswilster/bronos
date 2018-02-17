@@ -26,12 +26,12 @@ describe('zone', function() {
 
   describe('#fetch with roomName', function() {
     it('fetches zone status', async function() {
-      const zone = Zone.create({ roomName: 'Living Room' });
+      const zone = Zone.create({ roomName: 'MMXXIVXY' });
       const respond = respondSpy(ZONE_RESPONSE);
 
       await zone.fetch();
       assert.ok(respond.calledOnce);
-      assert.equal(zone.get('state').currentTrack.artist, 'Rihanna');
+      assert.equal(zone.get('state').currentTrack.artist, 'ScHoolboy Q');
     });
   });
 });

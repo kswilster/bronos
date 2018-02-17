@@ -4,19 +4,15 @@ import _ from 'underscore';
 import axios from 'axios';
 import Utils from '~/utils';
 import Zone from '~/models/zone';
-import SpotifyApi from './models/spotify-api';
+import Command from '~/models/command';
 
 var os = require('os');
 var fs = require('fs');
-var SpotifyWebApi = require('spotify-web-api-node');
 var stringify = require("asciify-pixel-matrix");
 
 try {
   var imageToAscii = require("image-to-ascii");
 } catch (e) {}
-
-const spotifyApi = new SpotifyWebApi();
-const spotify = SpotifyApi.create();
 
 process.on('uncaughtException', (err) => {
   fs.writeSync(1, `Caught exception: ${err}`);
@@ -27,43 +23,11 @@ function handleError (err) {
   exit();
 }
 
-function sleep(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-}
+const app = Command.extend({
+  needsSpotifyApi: true,
 
-// TODO: update config from sonos player
-// TODO: validate config structure?
-// TODO: node-image-to-ascii for album art
-
-// NOTE: repeat (all, none, one?)
-// NOTE: shuffle: true/false
-// NOTE: crossFade: true/false
-const app = {
-  run: async function({ showAlbumArt = false } = {}) {
-    const testing = false;
+  main: async function({ showAlbumArt = false } = {}) {
     showAlbumArt = imageToAscii ? showAlbumArt : false;
-
-    const fakeZone = {
-      roomName: 'Living Room',
-      state: {
-        playbackState: 'PLAYING',
-        currentTrack: {
-          artist: 'Drake',
-          album: 'Nothing Was the Same',
-          title: 'Started From the Bottom'
-        },
-        playMode: {
-          shuffle: false,
-          crossFade: true,
-          repeat: false
-        },
-        volume: 65
-      }
-    };
 
     var zone;
     try {
@@ -102,7 +66,6 @@ const app = {
     if (album && album.length && showAlbumArt) {
       try {
         const albumArtUrl = await this.getAlbumArtURL(artist, album);
-        // const albumArtUrl = 'http://content.whas11.com/photo/2016/09/09/red_river_gorge_1473447099143_5985427_ver1.0.jpg';
         const albumArt = await this.createAlbumArtMatrix(albumArtUrl, statusArray);
         console.log(albumArt);
       } catch (e) {
@@ -115,15 +78,9 @@ const app = {
   },
 
   getAlbumArtURL: async function(artist, album) {
-    await spotify.authenticate();
+    const spotify = this.get('spotifyApi');
     const albums = await spotify.findAlbums(album);
-    // const query = `https://api.spotify.com/v1/search?q=album:${album}%20artist:${artist}&type=album`;
-    // const { albums: { items } } = await this.spotifyRequest(query);
     return albums[0].images[2].url;
-  },
-
-  spotifyRequest: async function(url) {
-    return axios.get(url).then(({ data }) => data);
   },
 
   createAlbumArtMatrix: async function(imgUrl, textArray) {
@@ -217,10 +174,10 @@ const app = {
 
     return stringify.stringifyMatrix(ascii);
   },
-};
+});
 
 program
   .option('-a, --art', 'Show album art in ascii text')
   .parse(process.argv);
 
-app.run({ showAlbumArt: program.art });
+app.create().run({ showAlbumArt: program.art });

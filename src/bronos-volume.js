@@ -2,9 +2,10 @@ require('babel-polyfill');
 var program = require('commander');
 import Zone from './models/zone';
 import Utils from './utils';
+import Command from '~/models/command';
 
-const app = {
-  run: async function(volume) {
+const app = Command.extend({
+  main: async function(volume) {
     this.validateArgs(volume);
     volume = withinRange(volume, 0, 100);
     const zone = await Zone.getDefaultZone();
@@ -17,12 +18,12 @@ const app = {
       process.exit(1);
     }
   }
-}
+});
 
 program
   .arguments('<volume>')
   .action(function(volume) {
-    app.run(parseInt(volume));
+    app.create().run(parseInt(volume));
   })
   .parse(process.argv);
 

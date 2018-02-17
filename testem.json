@@ -2,7 +2,7 @@
   "framework": "mocha",
   "launchers": {
     "Mocha": {
-      "command": "node node_modules/.bin/mocha dist/test/** -R tap",
+      "command": "node node_modules/.bin/mocha --require babel-polyfill --compilers js:babel-register dist/test/** -R tap",
       "protocol": "tap"
     }
   },

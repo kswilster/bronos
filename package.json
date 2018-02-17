@@ -35,6 +35,7 @@
     "jquery": "^3.2.1",
     "jsdom": "^11.0.0",
     "preferences": "^0.2.1",
+    "rsvp": "^4.8.1",
     "sonos-http-api": "https://github.com/kswilster/node-sonos-http-api/archive/v1.8.0.tar.gz",
     "spotify-web-api-node": "^2.4.0",
     "underscore": "^1.8.3",
