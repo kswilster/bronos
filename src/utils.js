@@ -35,7 +35,6 @@ const Utils = {
     });
   },
 
-
   pollCondition: async function(callback, {
     maxTries = 50,
     interval = 50,
