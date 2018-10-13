@@ -7,14 +7,36 @@ const { Node } = Blessed;
 
 function AsyncTree(options) {
   if (!(this instanceof Node)) return new AsyncTree(options);
+  options = options || {};
+  options.keys = options.keys || ['right'];
   Tree.call(this, options);
 
   this.on('select', async (selectedNode, itemIndex) => {
-    this.screen.log(`node selected ${selectedNode.name}`);
     if (selectedNode.asyncState === 'init') {
       selectedNode.children = await selectedNode.asyncChildren();
+      selectedNode.asyncState = 'resolved';
       this.setData(this.data);
       this.screen.render();
+    }
+  });
+
+  const self = this;
+
+  this.rows.key('left', function() {
+    var selectedNode = self.nodeLines[this.getItemIndex(this.selected)];
+    self.screen.log(selectedNode);
+    const hasChildren = selectedNode.children || selectedNode.asyncChildren;
+    if (hasChildren && selectedNode.extended) {
+      selectedNode.extended = false;
+      self.setData(self.data);
+      self.screen.render();
+    } else if (selectedNode.parent && selectedNode.parent.parent) {
+      // NOTE: ensure parent.parent because the root node is special
+      selectedNode.parent.extended = false;
+      const parentIndex = self.nodeLines.indexOf(selectedNode.parent);
+      self.rows.select(parentIndex);
+      self.setData(self.data);
+      self.screen.render();
     }
   });
 }
@@ -65,7 +87,7 @@ AsyncTree.prototype.walk = function(node, treeDepth) {
       if (typeof child.extended === 'undefined')
         child.extended = this.options.extended;
 
-      if (typeof child.asyncChildren ===  'function' && !child.asyncState) {
+      if (typeof child.asyncChildren === 'function' && !child.asyncState) {
         child.asyncState = 'init';
         child.children = { Loading: { name: 'Loading...' } };
       }
