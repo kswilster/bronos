@@ -24,7 +24,6 @@ function AsyncTree(options) {
 
   this.rows.key('left', function() {
     var selectedNode = self.nodeLines[this.getItemIndex(this.selected)];
-    self.screen.log(selectedNode);
     const hasChildren = selectedNode.children || selectedNode.asyncChildren;
     if (hasChildren && selectedNode.extended) {
       selectedNode.extended = false;
