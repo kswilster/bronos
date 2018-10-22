@@ -4,9 +4,12 @@
     "Mocha": {
       "command": "node node_modules/.bin/mocha --require babel-polyfill --compilers js:babel-register dist/test/** -R tap",
       "protocol": "tap"
+    },
+    "eslint": {
+      "command": "eslint ./src"
     }
   },
-  "launch_in_dev" : [ "Mocha" ],
+  "launch_in_dev" : [ "Mocha", "eslint" ],
   "src_files": [
     "dist/**"
   ]
